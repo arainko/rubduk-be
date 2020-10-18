@@ -3,7 +3,7 @@ package io.rubduk
 import akka.actor.ActorSystem
 import akka.http.interop._
 import akka.http.scaladsl.server.Route
-import com.typesafe.config.{ Config, ConfigFactory }
+import com.typesafe.config.{Config, ConfigFactory}
 import slick.interop.zio.DatabaseProvider
 import zio.config.typesafe.TypesafeConfig
 import zio.console._
@@ -29,7 +29,7 @@ object Boot extends App {
     val configLayer = TypesafeConfig.fromTypesafeConfig(rawConfig, AppConfig.descriptor)
 
     // using raw config since it's recommended and the simplest to work with slick
-    val dbConfigLayer = ZLayer.fromEffect(ZIO(rawConfig.getConfig("db")))
+    val dbConfigLayer  = ZIO(rawConfig.getConfig("db")).toLayer
     val dbBackendLayer = ZLayer.succeed(slick.jdbc.H2Profile.backend)
 
     // narrowing down to the required part of the config to ensure separation of concerns
@@ -55,6 +55,6 @@ object Boot extends App {
     val routesLayer: ZLayer[Api, Nothing, Has[Route]] =
       ZLayer.fromService(_.routes)
 
-    (actorSystemLayer ++ apiConfigLayer ++ (apiLayer  >>> routesLayer)) >>> HttpServer.live
+    (actorSystemLayer ++ apiConfigLayer ++ (apiLayer >>> routesLayer)) >>> HttpServer.live
   }
 }
