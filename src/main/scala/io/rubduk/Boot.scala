@@ -4,16 +4,13 @@ import akka.actor.ActorSystem
 import akka.http.interop._
 import akka.http.scaladsl.server.Route
 import com.typesafe.config.{Config, ConfigFactory}
-import slick.interop.zio.DatabaseProvider
+import io.rubduk.api._
+import io.rubduk.config.AppConfig
+import zio._
 import zio.config.typesafe.TypesafeConfig
 import zio.console._
 import zio.logging._
 import zio.logging.slf4j._
-import zio._
-import io.rubduk.api._
-import io.rubduk.config.AppConfig
-import io.rubduk.domain.ItemRepository
-import io.rubduk.infrastructure._
 
 object Boot extends App {
 
@@ -30,7 +27,7 @@ object Boot extends App {
 
     // using raw config since it's recommended and the simplest to work with slick
     val dbConfigLayer  = ZIO(rawConfig.getConfig("db")).toLayer
-    val dbBackendLayer = ZLayer.succeed(slick.jdbc.H2Profile.backend)
+    val dbBackendLayer = ZLayer.succeed(slick.jdbc.PostgresProfile.backend)
 
     // narrowing down to the required part of the config to ensure separation of concerns
     val apiConfigLayer = configLayer.map(c => Has(c.get.api))
@@ -47,10 +44,7 @@ object Boot extends App {
       logFormat.format(correlationId, message)
     }
 
-    val dbLayer: TaskLayer[ItemRepository] =
-      (((dbConfigLayer ++ dbBackendLayer) >>> DatabaseProvider.live) ++ loggingLayer) >>> SlickItemRepository.live
-
-    val apiLayer: TaskLayer[Api] = (apiConfigLayer ++ dbLayer) >>> Api.live
+    val apiLayer: TaskLayer[Api] = apiConfigLayer >>> Api.live
 
     val routesLayer: ZLayer[Api, Nothing, Has[Route]] =
       ZLayer.fromService(_.routes)

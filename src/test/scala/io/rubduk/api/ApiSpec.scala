@@ -7,7 +7,6 @@ import akka.http.scaladsl.server.Route
 import akka.stream.scaladsl.{ Framing, Sink, Source }
 import akka.util.ByteString
 import io.rubduk.api.JsonSupport._
-import io.rubduk.application.ApplicationService
 import io.rubduk.domain._
 import io.rubduk.interop.akka.ZioRouteTest
 import play.api.libs.json.JsObject
