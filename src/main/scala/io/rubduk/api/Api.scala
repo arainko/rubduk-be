@@ -5,6 +5,7 @@ import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import io.rubduk.domain._
+import io.rubduk.domain.errors.{DomainError, RepositoryError, ValidationError}
 import zio._
 import zio.config.ZConfig
 
