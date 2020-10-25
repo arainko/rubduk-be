@@ -1,4 +1,4 @@
-package io.rubduk.domain
+package io.rubduk.domain.errors
 
 sealed trait DomainError {
   def asThrowable: Throwable = this match {

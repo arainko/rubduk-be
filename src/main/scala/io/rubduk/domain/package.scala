@@ -1,5 +1,8 @@
 package io.rubduk
 
+import io.rubduk.domain.repositories.UserRepository
+import zio.Has
+
 package object domain {
-  // type aliases for Has[*.Service]
+  type UserRepository = Has[UserRepository.Service]
 }
