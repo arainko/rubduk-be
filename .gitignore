@@ -1,3 +1,6 @@
+# For IntelliJ files
+.idea/
+
 target/
 boot/
 lib_managed/
