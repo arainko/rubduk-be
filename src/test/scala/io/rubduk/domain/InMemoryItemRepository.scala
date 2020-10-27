@@ -1,5 +1,6 @@
 package io.rubduk.domain
 
+import io.rubduk.domain.errors.RepositoryError
 import zio._
 import zio.stream.ZStream
 

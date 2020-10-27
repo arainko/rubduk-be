@@ -4,7 +4,7 @@ import io.rubduk.domain.UserRepository
 import io.rubduk.domain.repositories.live.UserRepositoryLive
 import io.rubduk.infrastructure.models._
 import slick.interop.zio.DatabaseProvider
-import zio.macros.annotation.accessible
+import zio.macros.accessible
 import zio.{Task, URLayer, ZLayer}
 
 /*
