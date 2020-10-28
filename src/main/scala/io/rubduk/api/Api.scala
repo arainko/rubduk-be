@@ -3,9 +3,16 @@ package io.rubduk.api
 import akka.http.interop._
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.marshalling.Marshalling._
 import akka.http.scaladsl.server.Route
-import io.rubduk.domain._
-import io.rubduk.domain.errors.{DomainError, RepositoryError, ValidationError}
+import io.rubduk.domain.errors.ApplicationError
+import io.rubduk.domain.errors.UserError.UserNotFound
+import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+import io.circe.generic.auto._
+import io.rubduk.domain.UserRepository
+import io.rubduk.domain.repositories.UserRepository
+import io.rubduk.domain.services.UserService
+import io.rubduk.infrastructure.models.{Limit, Offset, Page, RowCount, UserDAO, UserId}
 import zio._
 import zio.config.ZConfig
 
@@ -20,13 +27,14 @@ object Api {
 
       def routes: Route = placeholderRoute
 
-      implicit val domainErrorResponse: ErrorResponse[DomainError] = {
-        case RepositoryError(_) => HttpResponse(StatusCodes.InternalServerError)
-        case ValidationError(_) => HttpResponse(StatusCodes.BadRequest)
-      }
+//      implicit val domainErrorResponse: ErrorResponse[Throwable] = {
+//        case _: Throwable => HttpResponse(StatusCodes.NotFound)
+//      }
 
       val placeholderRoute: Route = path("test") {
-        complete("PLACEHOLDER")
+        complete {
+          "PLACEHOLDER"
+        }
       }
     }
   }

@@ -4,7 +4,7 @@ import io.rubduk.domain.PostRepository
 import io.rubduk.domain.repositories.live.PostRepositoryLive
 import io.rubduk.infrastructure.models._
 import slick.interop.zio.DatabaseProvider
-import zio.macros.annotation.accessible
+import zio.macros.accessible
 import zio.{Task, URLayer, ZLayer}
 
 @accessible
@@ -14,7 +14,7 @@ object PostRepository {
     def getAllPaginated(offset: Offset, limit: Limit): Task[Page[PostDAO]]
     def getAll(offset: Offset, limit: Limit): Task[Seq[PostDAO]]
     def count: Task[RowCount]
-    def insert(post: PostDAO): Task[UserId]
+    def insert(post: PostDAO): Task[PostId]
     def update(postId: PostId, post: PostDAO): Task[RowCount]
   }
 

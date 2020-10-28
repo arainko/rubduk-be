@@ -1,13 +1,13 @@
 package io.rubduk.domain.repositories.live
 
 import io.rubduk.domain.repositories.PostRepository
-import io.rubduk.infrastructure.models.{Limit, Offset, Page, RowCount, PostDAO, PostId}
+import io.rubduk.infrastructure.models.{Limit, Offset, Page, PostDAO, PostId, RowCount, UserId}
 import io.rubduk.infrastructure.tables.Posts
 import slick.interop.zio.DatabaseProvider
 import slick.interop.zio.syntax._
 import io.rubduk.infrastructure.converters.IdConverter._
 import slick.jdbc.PostgresProfile.api._
-import zio.{Task, ZIO}
+import zio.{IO, Task, ZIO}
 
 class PostRepositoryLive(env: DatabaseProvider) extends PostRepository.Service {
   
@@ -37,7 +37,7 @@ class PostRepositoryLive(env: DatabaseProvider) extends PostRepository.Service {
       Posts.table.length.result
     }.provide(env)
 
-  override def insert(postDAO: PostDAO): Task[PostId] =
+  override def insert(post: PostDAO): Task[PostId] =
     ZIO.fromDBIO {
       Posts.table.returning(Posts.table.map(_.id)) += post
     }.provide(env)
@@ -45,7 +45,7 @@ class PostRepositoryLive(env: DatabaseProvider) extends PostRepository.Service {
   override def update(postId: PostId, post: PostDAO): Task[RowCount] =
     ZIO.fromDBIO {
       Posts.table
-        .map(p => (p.content))
-        .update((post.content))
+        .map(p => p.contents)
+        .update(post.contents)
     }.provide(env)
 }
