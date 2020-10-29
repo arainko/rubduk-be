@@ -1,16 +1,18 @@
 #!/bin/bash
 username="postgres"
 password="postgres"
+db_prefix="jdbc:postgresql://localhost:5432/"
 url="jdbc:postgresql://localhost:5432/rubduk"
 action="flywayMigrate"
 
-while getopts n:p:u:c flag
+while getopts n:p:u:d:c flag
 do
     # shellcheck disable=SC2220
     case "${flag}" in
         n) username=${OPTARG};;
         p) password=${OPTARG};;
         u) url=${OPTARG};;
+        d) url="${db_prefix}${OPTARG}";;
         c) action="flywayClean";;
     esac
 done
