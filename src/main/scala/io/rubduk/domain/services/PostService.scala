@@ -47,6 +47,9 @@ object PostService {
     } yield insertedId
 
   def update(postId: PostId, post: PostDTO): ZIO[PostRepository, PostError, Unit] =
-    ???
+    PostRepository.update(postId, post.contents)
+      .orDieWith(ServerError)
+      .reject { case 0 => PostNotFound }
+      .unit
 
 }

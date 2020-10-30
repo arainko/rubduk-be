@@ -15,7 +15,7 @@ object CommentRepository {
     def getByPostId(postId: PostId, offset: Offset, limit: Limit): Task[Seq[CommentDAO]]
     def countByPostId(postId: PostId): Task[RowCount]
     def insert(postId: PostId, comment: CommentDAO): Task[CommentId]
-    def update(commentId: CommentId, contents: String): Task[RowCount]
+    def update(postId: PostId, commentId: CommentId, contents: String): Task[RowCount]
   }
 
   val live: URLayer[DatabaseProvider, CommentRepository] = ZLayer.fromFunction { database =>
