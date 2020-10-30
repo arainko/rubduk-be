@@ -42,10 +42,10 @@ class PostRepositoryLive(env: DatabaseProvider) extends PostRepository.Service {
       Posts.table.returning(Posts.table.map(_.id)) += post
     }.provide(env)
 
-  override def update(postId: PostId, post: PostDAO): Task[RowCount] =
+  override def update(postId: PostId, contents: String): Task[RowCount] =
     ZIO.fromDBIO {
       Posts.table
         .map(p => p.contents)
-        .update(post.contents)
+        .update(contents)
     }.provide(env)
 }
