@@ -1,13 +1,15 @@
 package io.rubduk.domain.services
 
+import cats.syntax.functor._
+import io.rubduk.domain.{PostRepository, UserRepository}
 import io.rubduk.domain.errors.ApplicationError.{EntityError, ServerError}
+import io.rubduk.domain.errors.{PostError, UserError}
 import io.rubduk.domain.errors.PostError.PostNotFound
 import io.rubduk.domain.errors.UserError.UserNotFound
-import io.rubduk.domain.errors.{PostError, UserError}
 import io.rubduk.domain.repositories.PostRepository
-import io.rubduk.domain.{PostRepository, UserRepository}
+import io.rubduk.infrastructure.models.Page._
 import io.rubduk.infrastructure.models._
-import zio.ZIO
+import zio.{Has, ZIO}
 
 object PostService {
 
@@ -45,9 +47,6 @@ object PostService {
     } yield insertedId
 
   def update(postId: PostId, post: PostDTO): ZIO[PostRepository, PostError, Unit] =
-    PostRepository.update(postId, post.contents)
-      .orDieWith(ServerError)
-      .reject { case 0 => PostNotFound }
-      .unit
+    ???
 
 }
