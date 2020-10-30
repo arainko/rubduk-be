@@ -53,6 +53,14 @@ class UserRepositoryLive(env: DatabaseProvider) extends UserRepository.Service {
         .headOption
     }.provide(env)
 
+  override def getByEmail(email: String): Task[Option[UserDAO]] =
+    ZIO.fromDBIO {
+      Users.table
+        .filter(_.email === email)
+        .result
+        .headOption
+    }.provide(env)
+
   /*
   .zipPar executes the two methods in parallel so we won't have to wait that
   long for the results to come from the DB

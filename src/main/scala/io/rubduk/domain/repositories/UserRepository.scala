@@ -35,6 +35,7 @@ object UserRepository {
    */
   trait Service {
     def getById(userId: UserId): Task[Option[UserDAO]]
+    def getByEmail(email: String): Task[Option[UserDAO]]
     def getAllPaginated(offset: Offset, limit: Limit): Task[Page[UserDAO]]
     def getAll(offset: Offset, limit: Limit): Task[Seq[UserDAO]]
     def count: Task[RowCount]

@@ -10,6 +10,7 @@ final case class UserDAO(
   id: Option[UserId],
   name: String,
   lastName: Option[String],
+  email: String,
   dateOfBirth: Option[LocalDate],
   createdOn: OffsetDateTime
 ) {
@@ -21,6 +22,7 @@ final case class User(
   id: Option[UserId],
   name: String,
   lastName: Option[String],
+  email: String,
   dateOfBirth: Option[LocalDate],
   createdOn: OffsetDateTime
 ) {
@@ -32,6 +34,7 @@ final case class UserDTO(
   id: Option[UserId],
   name: String,
   lastName: Option[String],
+  email: String,
   dateOfBirth: Option[LocalDate],
   createdOn: OffsetDateTime
 ) {
