@@ -11,11 +11,11 @@ import zio.{Task, URLayer, ZLayer}
 object CommentRepository {
   trait Service {
     def getById(commentId: CommentId): Task[Option[CommentDAO]]
-    def getAllPaginated(offset: Offset, limit: Limit): Task[Page[CommentDAO]]
-    def getAll(offset: Offset, limit: Limit): Task[Seq[CommentDAO]]
-    def count: Task[RowCount]
-    def insert(comment: CommentDAO): Task[CommentId]
-    def update(commentId: CommentId, comment: CommentDAO): Task[RowCount]
+    def getByPostIdPaginated(postId: PostId, offset: Offset, limit: Limit): Task[Page[CommentDAO]]
+    def getByPostId(postId: PostId, offset: Offset, limit: Limit): Task[Seq[CommentDAO]]
+    def countByPostId(postId: PostId): Task[RowCount]
+    def insert(postId: PostId, comment: CommentDAO): Task[CommentId]
+    def update(commentId: CommentId, contents: String): Task[RowCount]
   }
 
   val live: URLayer[DatabaseProvider, CommentRepository] = ZLayer.fromFunction { database =>

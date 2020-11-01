@@ -1,7 +1,7 @@
 package io.rubduk.domain.repositories.live
 
 import io.rubduk.domain.repositories.CommentRepository
-import io.rubduk.infrastructure.models.{Limit, Offset, Page, RowCount, CommentDAO, CommentId}
+import io.rubduk.infrastructure.models.{CommentDAO, CommentId, Limit, Offset, Page, PostId, RowCount}
 import io.rubduk.infrastructure.tables.Comments
 import slick.interop.zio.DatabaseProvider
 import slick.interop.zio.syntax._
@@ -18,33 +18,37 @@ class CommentRepositoryLive(env: DatabaseProvider) extends CommentRepository.Ser
         .headOption
     }.provide(env)
 
-  override def getAllPaginated(offset: Offset, limit: Limit): Task[Page[CommentDAO]] =
-    getAll(offset, limit).zipPar(count).map {
-      case (comments, commentCount) => Page(comments, commentCount)
-    }
+  override def getByPostIdPaginated(postId: PostId, offset: Offset, limit: Limit): Task[Page[CommentDAO]] =
+    getByPostId(postId, offset, limit)
+      .zipPar(countByPostId(postId))
+      .map { case (comments, count) => Page(comments, count) }
 
-  override def getAll(offset: Offset, limit: Limit): Task[Seq[CommentDAO]] =
+  override def getByPostId(postId: PostId, offset: Offset, limit: Limit): Task[Seq[CommentDAO]] =
     ZIO.fromDBIO {
       Comments.table
+        .filter(_.postId === postId)
         .drop(offset.value)
         .take(limit.value)
         .result
     }.provide(env)
 
-  override def count: Task[RowCount] =
+  override def countByPostId(postId: PostId): Task[RowCount] =
     ZIO.fromDBIO {
-      Comments.table.length.result
+      Comments.table
+        .filter(_.postId === postId)
+        .length
+        .result
     }.provide(env)
 
-  override def insert(comment: CommentDAO): Task[CommentId] =
+  override def insert(postId: PostId, comment: CommentDAO): Task[CommentId] =
     ZIO.fromDBIO {
       Comments.table.returning(Comments.table.map(_.id)) += comment
     }.provide(env)
 
-  override def update(commentId: CommentId, comment: CommentDAO): Task[RowCount] =
+  override def update(commentId: CommentId, contents: String): Task[RowCount] =
     ZIO.fromDBIO {
       Comments.table
-        .map(c => (c.contents))
-        .update((comment.contents))
+        .map(_.contents)
+        .update(contents)
     }.provide(env)
 }
