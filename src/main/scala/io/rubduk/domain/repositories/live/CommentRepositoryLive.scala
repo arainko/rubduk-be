@@ -45,7 +45,7 @@ class CommentRepositoryLive(env: DatabaseProvider) extends CommentRepository.Ser
       Comments.table.returning(Comments.table.map(_.id)) += comment
     }.provide(env)
 
-  override def update(postId: PostId, commentId: CommentId, contents: String): Task[RowCount] =
+  override def update(commentId: CommentId, contents: String): Task[RowCount] =
     ZIO.fromDBIO {
       Comments.table
         .map(_.contents)
