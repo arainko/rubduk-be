@@ -15,7 +15,7 @@ object PostRepository {
     def getAll(offset: Offset, limit: Limit): Task[Seq[PostDAO]]
     def count: Task[RowCount]
     def insert(post: PostDAO): Task[PostId]
-    def update(postId: PostId, post: PostDAO): Task[RowCount]
+    def update(postId: PostId, contents: String): Task[RowCount]
   }
 
   val live: URLayer[DatabaseProvider, PostRepository] = ZLayer.fromFunction { database =>
