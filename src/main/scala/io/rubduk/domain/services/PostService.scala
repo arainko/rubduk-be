@@ -1,15 +1,13 @@
 package io.rubduk.domain.services
 
-import cats.syntax.functor._
-import io.rubduk.domain.{PostRepository, UserRepository}
 import io.rubduk.domain.errors.ApplicationError.{EntityError, ServerError}
-import io.rubduk.domain.errors.{PostError, UserError}
 import io.rubduk.domain.errors.PostError.PostNotFound
 import io.rubduk.domain.errors.UserError.UserNotFound
+import io.rubduk.domain.errors.{PostError, UserError}
 import io.rubduk.domain.repositories.PostRepository
-import io.rubduk.infrastructure.models.Page._
+import io.rubduk.domain.{PostRepository, UserRepository}
 import io.rubduk.infrastructure.models._
-import zio.{Has, ZIO}
+import zio.ZIO
 
 object PostService {
 
