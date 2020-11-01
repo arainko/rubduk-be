@@ -4,12 +4,12 @@ import akka.http.interop.HttpServer
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Route
-import akka.stream.scaladsl.{ Framing, Sink, Source }
+import akka.stream.scaladsl.{Framing, Sink, Source}
 import akka.util.ByteString
 import io.rubduk.api.JsonSupport._
+import io.rubduk.api.routes.Api
 import io.rubduk.domain._
 import io.rubduk.interop.akka.ZioRouteTest
-import play.api.libs.json.JsObject
 import zio._
 import zio.blocking._
 import zio.clock.Clock

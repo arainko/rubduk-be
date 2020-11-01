@@ -5,7 +5,10 @@ import akka.http.interop._
 import akka.http.scaladsl.server.Route
 import com.typesafe.config.{Config, ConfigFactory}
 import io.rubduk.api._
+import io.rubduk.api.routes.Api
 import io.rubduk.config.AppConfig
+import io.rubduk.domain.repositories.{PostRepository, UserRepository}
+import slick.interop.zio.DatabaseProvider
 import zio._
 import zio.config.typesafe.TypesafeConfig
 import zio.console._
@@ -28,6 +31,10 @@ object Boot extends App {
     // using raw config since it's recommended and the simplest to work with slick
     val dbConfigLayer  = ZIO(rawConfig.getConfig("db")).toLayer
     val dbBackendLayer = ZLayer.succeed(slick.jdbc.PostgresProfile.backend)
+    val repositoryLayer =
+      (dbConfigLayer ++ dbBackendLayer) >>>
+      DatabaseProvider.live >>>
+      (PostRepository.live ++ UserRepository.live)
 
     // narrowing down to the required part of the config to ensure separation of concerns
     val apiConfigLayer = configLayer.map(c => Has(c.get.api))
@@ -44,7 +51,7 @@ object Boot extends App {
       logFormat.format(correlationId, message)
     }
 
-    val apiLayer: TaskLayer[Api] = apiConfigLayer >>> Api.live
+    val apiLayer: TaskLayer[Api] = apiConfigLayer ++ repositoryLayer >>> Api.live
 
     val routesLayer: ZLayer[Api, Nothing, Has[Route]] =
       ZLayer.fromService(_.routes)
