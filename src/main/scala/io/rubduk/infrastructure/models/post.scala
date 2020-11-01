@@ -1,8 +1,9 @@
 package io.rubduk.infrastructure.models
 
 import io.scalaland.chimney.dsl._
-
 import java.time.OffsetDateTime
+
+import cats.implicits.catsSyntaxOptionId
 
 final case class PostId(value: Long) extends AnyVal
 
@@ -30,20 +31,22 @@ final case class Post(
       .withFieldConst(_.userId, userId)
       .transform
 
-  def toDTO: PostDTO =
+  def toDTO(userId: UserId): PostDTO =
     this.into[PostDTO]
-      .withFieldComputed(_.user, _.user.toDTO)
+      .withFieldConst(_.userId, userId.some)
+      .withFieldComputed(_.dateAdded, _.dateAdded.some)
       .transform
 }
 
 final case class PostDTO(
   id: Option[PostId],
   contents: String,
-  user: UserDTO,
-  dateAdded: OffsetDateTime
+  userId: Option[UserId],
+  dateAdded: Option[OffsetDateTime]
 ) {
-  def toDomain: Post =
+  def toDomain(user: User, dateAdded: OffsetDateTime): Post =
     this.into[Post]
-      .withFieldComputed(_.user, _.user.toDomain)
+      .withFieldConst(_.user, user)
+      .withFieldConst(_.dateAdded, dateAdded)
       .transform
 }
