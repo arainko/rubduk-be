@@ -21,9 +21,9 @@ object PostService {
       user <- UserService.getById(post.userId)
     } yield post.toDomain(user)
 
-  def getAllPaginated(offset: Offset, limit: Limit): ZIO[PostRepository with UserRepository, EntityError, Page[Post]] =
+  def getAllPaginated(offset: Offset, limit: Limit): ZIO[PostRepository with UserRepository, Throwable, Page[Post]] =
     for {
-      posts <- PostRepository.getAllPaginated(offset, limit).orDieWith(ServerError)
+      posts <- PostRepository.getAllPaginated(offset, limit)
       postsWithUsers <- ZIO.foreachPar(posts.entities) { post =>
         UserService.getById(post.userId).map(user => post.toDomain(user))
       }

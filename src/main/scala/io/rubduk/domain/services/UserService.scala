@@ -8,12 +8,13 @@ import io.rubduk.domain.errors.UserError.UserNotFound
 import io.rubduk.domain.repositories.UserRepository
 import io.rubduk.infrastructure.models.Page._
 import io.rubduk.infrastructure.models._
-import zio.ZIO
+import zio.{UIO, ZIO}
 
 object UserService {
 
   def getById(userId: UserId): ZIO[UserRepository, UserError, User] =
     UserRepository.getById(userId)
+      .tapBoth(a => UIO(println(a)),a => UIO(println(a)))
       .flatMap(ZIO.fromOption(_))
       .bimap(_ => UserNotFound, _.toDomain)
 
