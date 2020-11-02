@@ -9,8 +9,11 @@ import io.circe.generic.auto._
 import io.rubduk.api.serializers.Unmarshallers.{limit, offset}
 import io.rubduk.domain.services.PostService
 import io.rubduk.domain.{PostRepository, UserRepository}
+import io.rubduk.infrastructure.converters.IdConverter
 import io.rubduk.infrastructure.converters.IdConverter.Id
 import io.rubduk.infrastructure.models.{Limit, Offset, PostDTO, PostId, UserId}
+
+import scala.util.Try
 
 object PostsApi {
   def apply(env: PostRepository with UserRepository): Route = new PostsApi(env).routes
@@ -18,7 +21,7 @@ object PostsApi {
 
 class PostsApi(env: PostRepository with UserRepository) extends Api.Service {
 
-  private val __placeholderUserId__ = UserId(1) // TODO: add an auth directive
+  private val __placeholderUserId__ = UserId(2) // TODO: add an auth directive
 
   override def routes: Route =
     pathPrefix("api" / "posts") {
