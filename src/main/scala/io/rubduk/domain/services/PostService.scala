@@ -45,10 +45,12 @@ object PostService {
       insertedId <- PostRepository.insert(postToInsert).orDieWith(ServerError)
     } yield insertedId
 
-  def update(postId: PostId, post: PostDTO): ZIO[PostRepository, PostError, Unit] =
-    PostRepository.update(postId, post.contents)
-      .orDieWith(ServerError)
-      .reject { case 0 => PostNotFound }
-      .unit
+  def update(postId: PostId, userId: UserId, post: PostDTO): ZIO[PostRepository with UserRepository, EntityError, Unit] =
+    for {
+      postUserId <- PostService.getById(postId).map(_.user.id).someOrFail(UserNotFound)
+      _ <- PostRepository.update(postId, post.contents)
+        .orDieWith(ServerError)
+        .when(postUserId == userId)
+    } yield ()
 
 }

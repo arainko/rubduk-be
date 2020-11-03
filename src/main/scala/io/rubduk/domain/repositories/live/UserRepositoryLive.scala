@@ -6,7 +6,7 @@ import io.rubduk.infrastructure.tables.Users
 import slick.interop.zio.DatabaseProvider
 import slick.interop.zio.syntax._
 import io.rubduk.infrastructure.converters.IdConverter._
-import slick.jdbc.PostgresProfile.api._
+import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
 import zio.{Task, ZIO}
 
 /*
@@ -19,7 +19,7 @@ class UserRepositoryLive(env: DatabaseProvider) extends UserRepository.Service {
   Some words of caution, you should always and I mean ALWAYS
 
   --- !!! --- !!! --- !!!
-  import slick.jdbc.PostgresProfile.api._
+  import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
   --- !!! --- !!! --- !!!
 
   when writing Repository classes to even have access to the Slick methods,
@@ -91,6 +91,7 @@ class UserRepositoryLive(env: DatabaseProvider) extends UserRepository.Service {
   override def update(userId: UserId, user: UserDAO): Task[RowCount] =
     ZIO.fromDBIO {
       Users.table
+        .filter(_.id === userId)
         .map(u => (u.name, u.lastName, u.dateOfBirth))
         .update((user.name, user.lastName, user.dateOfBirth))
     }.provide(env)

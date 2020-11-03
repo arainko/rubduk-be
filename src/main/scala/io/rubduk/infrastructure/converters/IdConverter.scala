@@ -1,7 +1,7 @@
 package io.rubduk.infrastructure.converters
 
 import io.rubduk.infrastructure.models.{CommentId, PostId, UserId}
-import slick.jdbc.PostgresProfile.api._
+import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 import io.circe.Decoder.Result

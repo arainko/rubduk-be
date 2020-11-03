@@ -6,7 +6,7 @@ import io.rubduk.infrastructure.tables.Posts
 import slick.interop.zio.DatabaseProvider
 import slick.interop.zio.syntax._
 import io.rubduk.infrastructure.converters.IdConverter._
-import slick.jdbc.PostgresProfile.api._
+import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
 import zio.{IO, Task, ZIO}
 
 class PostRepositoryLive(env: DatabaseProvider) extends PostRepository.Service {
@@ -45,6 +45,7 @@ class PostRepositoryLive(env: DatabaseProvider) extends PostRepository.Service {
   override def update(postId: PostId, contents: String): Task[RowCount] =
     ZIO.fromDBIO {
       Posts.table
+        .filter(_.id === postId)
         .map(p => p.contents)
         .update(contents)
     }.provide(env)

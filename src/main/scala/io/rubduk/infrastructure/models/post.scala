@@ -31,10 +31,10 @@ final case class Post(
       .withFieldConst(_.userId, userId)
       .transform
 
-  def toDTO(userId: UserId): PostDTO =
+  def toDTO: PostDTO =
     this.into[PostDTO]
-      .withFieldConst(_.userId, userId.some)
       .withFieldComputed(_.dateAdded, _.dateAdded.some)
+      .withFieldComputed(_.userId, _.user.id)
       .transform
 }
 

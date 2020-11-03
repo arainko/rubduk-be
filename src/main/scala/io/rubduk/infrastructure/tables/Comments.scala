@@ -4,7 +4,7 @@ import java.time.OffsetDateTime
 
 import io.rubduk.infrastructure.converters.IdConverter._
 import io.rubduk.infrastructure.models.{CommentDAO, CommentId, PostId, UserId}
-import slick.jdbc.PostgresProfile.api._
+import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
 
 object Comments {
 
