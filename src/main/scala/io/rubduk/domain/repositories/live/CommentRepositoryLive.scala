@@ -6,7 +6,7 @@ import io.rubduk.infrastructure.tables.Comments
 import slick.interop.zio.DatabaseProvider
 import slick.interop.zio.syntax._
 import io.rubduk.infrastructure.converters.IdConverter._
-import slick.jdbc.PostgresProfile.api._
+import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
 import zio.{Task, ZIO}
 
 class CommentRepositoryLive(env: DatabaseProvider) extends CommentRepository.Service {

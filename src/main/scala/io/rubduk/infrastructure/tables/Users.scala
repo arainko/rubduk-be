@@ -4,7 +4,7 @@ import java.time.{LocalDate, OffsetDateTime}
 
 import io.rubduk.infrastructure.converters.IdConverter._
 import io.rubduk.infrastructure.models.{UserDAO, UserId}
-import slick.jdbc.PostgresProfile.api._
+import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
 
 object Users {
   class Schema(tag: Tag) extends Table[UserDAO](tag, "users") {
