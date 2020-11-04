@@ -14,7 +14,6 @@ object UserService {
 
   def getById(userId: UserId): ZIO[UserRepository, UserError, User] =
     UserRepository.getById(userId)
-      .tapBoth(a => UIO(println(a)),a => UIO(println(a)))
       .flatMap(ZIO.fromOption(_))
       .bimap(_ => UserNotFound, _.toDomain)
 

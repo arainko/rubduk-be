@@ -33,20 +33,18 @@ final case class Post(
 
   def toDTO: PostDTO =
     this.into[PostDTO]
-      .withFieldComputed(_.dateAdded, _.dateAdded.some)
-      .withFieldComputed(_.userId, _.user.id)
+      .withFieldComputed(_.user, _.user.toDTO)
       .transform
 }
 
 final case class PostDTO(
   id: Option[PostId],
   contents: String,
-  userId: Option[UserId],
-  dateAdded: Option[OffsetDateTime]
+  user: UserDTO,
+  dateAdded: OffsetDateTime
 ) {
-  def toDomain(user: User, dateAdded: OffsetDateTime): Post =
+  def toDomain: Post =
     this.into[Post]
-      .withFieldConst(_.user, user)
-      .withFieldConst(_.dateAdded, dateAdded)
+      .withFieldComputed(_.user, _.user.toDomain)
       .transform
 }
