@@ -14,6 +14,7 @@ import zio.config.typesafe.TypesafeConfig
 import zio.console._
 import zio.logging._
 import zio.logging.slf4j._
+import slick.jdbc.PostgresProfile
 
 object Boot extends App {
 
@@ -30,7 +31,7 @@ object Boot extends App {
 
     // using raw config since it's recommended and the simplest to work with slick
     val dbConfigLayer  = ZIO(rawConfig.getConfig("db")).toLayer
-    val dbBackendLayer = ZLayer.succeed(slick.jdbc.PostgresProfile.backend)
+    val dbBackendLayer = ZLayer.succeed(PostgresProfile.backend)
     val repositoryLayer =
       (dbConfigLayer ++ dbBackendLayer) >>>
       DatabaseProvider.live >>>
