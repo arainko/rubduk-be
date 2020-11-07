@@ -36,8 +36,15 @@ final case class UserDTO(
   lastName: Option[String],
   email: String,
   dateOfBirth: Option[LocalDate],
-  createdOn: OffsetDateTime
+  createdOn: Option[OffsetDateTime]
 ) {
-  def toDAO: UserDAO = this.transformInto[UserDAO]
-  def toDomain: User = this.transformInto[User]
+  def toDAO(createdOn: OffsetDateTime): UserDAO =
+    this.into[UserDAO]
+      .withFieldConst(_.createdOn, createdOn)
+      .transform
+
+  def toDomain(createdOn: OffsetDateTime): User =
+    this.into[User]
+      .withFieldConst(_.createdOn, createdOn)
+      .transform
 }

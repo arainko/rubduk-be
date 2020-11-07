@@ -7,6 +7,7 @@ import io.rubduk.api.Api
 import io.rubduk.domain.{PostRepository, UserRepository}
 import zio.config.ZConfig
 import zio.{URIO, ZIO, ZLayer}
+import akka.http.scaladsl.server.Directives._
 
 object Api {
 
@@ -16,18 +17,7 @@ object Api {
 
   val live: ZLayer[ZConfig[HttpServer.Config] with PostRepository with UserRepository, Nothing, Api] = ZLayer.fromFunction { env =>
     new Service {
-
-      def routes: Route = PostsApi(env)
-
-//      implicit val domainErrorResponse: ErrorResponse[Throwable] = {
-//        case _: Throwable => HttpResponse(StatusCodes.NotFound)
-//      }
-
-      val placeholderRoute: Route = path("test") {
-        complete {
-          "PLACEHOLDER"
-        }
-      }
+      def routes: Route = PostsApi(env) ~ UserApi(env)
     }
   }
 
