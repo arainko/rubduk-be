@@ -7,7 +7,7 @@ import com.typesafe.config.{Config, ConfigFactory}
 import io.rubduk.api._
 import io.rubduk.api.routes.Api
 import io.rubduk.config.AppConfig
-import io.rubduk.domain.repositories.{PostRepository, UserRepository}
+import io.rubduk.domain.repositories.{PostRepository, UserRepository, CommentRepository}
 import slick.interop.zio.DatabaseProvider
 import zio._
 import zio.config.typesafe.TypesafeConfig
@@ -35,7 +35,7 @@ object Boot extends App {
     val repositoryLayer =
       (dbConfigLayer ++ dbBackendLayer) >>>
       DatabaseProvider.live >>>
-      (PostRepository.live ++ UserRepository.live)
+      (PostRepository.live ++ UserRepository.live ++ CommentRepository.live)
 
     // narrowing down to the required part of the config to ensure separation of concerns
     val apiConfigLayer = configLayer.map(c => Has(c.get.api))

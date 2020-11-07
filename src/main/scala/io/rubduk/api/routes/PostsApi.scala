@@ -14,6 +14,11 @@ import io.rubduk.infrastructure.converters.IdConverter.idCodec
 import io.rubduk.infrastructure.converters.IdConverter.Id
 import zio.{Runtime => _}
 import io.rubduk.infrastructure.models.{Limit, Offset, PostDTO, PostId, UserId}
+import akka.actor.typed.ActorSystem
+import akka.actor.typed.scaladsl.Behaviors
+import akka.http.scaladsl.Http
+import akka.http.scaladsl.model.HttpMethods._
+import akka.http.scaladsl.model._
 
 object PostsApi {
   def apply(env: PostRepository with UserRepository): Route = new PostsApi(env).routes
@@ -62,6 +67,11 @@ class PostsApi(env: PostRepository with UserRepository) extends Api.Service {
               .provide(env)
           }
         }
+      }
+    } ~
+    pathPrefix("api" / "post") {
+      get {
+        complete(HttpEntity(ContentTypes.`text/html(UTF-8)`, "<h1>Say hello to akka-http</h1>"))
       }
     }
 }
