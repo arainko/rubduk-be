@@ -10,11 +10,12 @@ import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
 import zio.{Task, ZIO}
 
 class CommentRepositoryLive(env: DatabaseProvider) extends CommentRepository.Service {
-  override def getById(commentId: CommentId): Task[Option[CommentDAO]] =
+  override def getById(postId: PostId, commentId: CommentId): Task[Option[CommentDAO]] =
     ZIO.fromDBIO {
       Comments.table
-        .filter(_.id === commentId)
-        .result
+        .filter {
+          comment => comment.id === commentId && comment.postId === postId
+        }.result
         .headOption
     }.provide(env)
 

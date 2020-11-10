@@ -14,12 +14,8 @@ import io.rubduk.domain.{CommentRepository, PostRepository, UserRepository}
 import io.rubduk.infrastructure.converters.IdConverter.idCodec
 import io.rubduk.infrastructure.converters.IdConverter.Id
 import zio.{Runtime => _}
-import io.rubduk.infrastructure.models.{CommentDTO, CommentId, Limit, Offset, PostDTO, PostId, UserId}
-import akka.actor.typed.ActorSystem
-import akka.actor.typed.scaladsl.Behaviors
-import akka.http.scaladsl.Http
-import akka.http.scaladsl.model.HttpMethods._
-import akka.http.scaladsl.model._
+import io.rubduk.infrastructure.models.{CommentDTO, CommentId, Limit, Offset, PostDTO, PostId}
+
 
 object PostsApi {
   def apply(env: PostRepository with UserRepository with CommentRepository): Route = new PostsApi(env).routes
@@ -67,7 +63,7 @@ class PostsApi(env: PostRepository with UserRepository with CommentRepository) e
             pathEnd {
               complete {
                 CommentService
-                  .getById(commentId)
+                  .getById(postId, commentId)
                   .map(_.toDTO)
                   .provide(env)
               }

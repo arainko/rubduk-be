@@ -10,7 +10,7 @@ import zio.{Task, URLayer, ZLayer}
 @accessible
 object CommentRepository {
   trait Service {
-    def getById(commentId: CommentId): Task[Option[CommentDAO]]
+    def getById(postId: PostId, commentId: CommentId): Task[Option[CommentDAO]]
     def getByPostIdPaginated(postId: PostId, offset: Offset, limit: Limit): Task[Page[CommentDAO]]
     def getByPostId(postId: PostId, offset: Offset, limit: Limit): Task[Seq[CommentDAO]]
     def countByPostId(postId: PostId): Task[RowCount]

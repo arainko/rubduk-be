@@ -23,8 +23,8 @@ object CommentService {
       .orDieWith(ServerError)
       .map(_.map(_.toDomain))
 
-  def getById(commentId: CommentId): ZIO[CommentRepository, CommentError, Comment] =
-    CommentRepository.getById(commentId)
+  def getById(postId: PostId, commentId: CommentId): ZIO[CommentRepository, CommentError, Comment] =
+    CommentRepository.getById(postId, commentId)
       .flatMap(ZIO.fromOption(_))
       .bimap(_ => CommentNotFound, _.toDomain)
 
