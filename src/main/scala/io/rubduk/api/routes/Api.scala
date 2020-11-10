@@ -16,7 +16,7 @@ object Api {
 
   val live: ZLayer[ZConfig[HttpServer.Config] with PostRepository with UserRepository with CommentRepository, Nothing, Api] = ZLayer.fromFunction { env =>
     new Service {
-      def routes: Route = PostsApi(env) ~ UsersApi(env) ~ CommentsApi(env)
+      def routes: Route = PostsApi(env) ~ UsersApi(env)
     }
   }
 

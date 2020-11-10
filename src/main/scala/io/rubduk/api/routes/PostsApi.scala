@@ -72,18 +72,38 @@ class PostsApi(env: PostRepository with UserRepository with CommentRepository) e
         }
       } ~ post {
         (userId & entity(parse[PostDTO])) { (userId, post) =>
-          complete {
-            PostService
-              .insert(userId, post)
-              .provide(env)
+          pathEnd {
+            complete {
+              PostService
+                .insert(userId, post)
+                .provide(env)
+            }
+          }
+        } ~ {
+          (path(Id[PostId] / "comments") & userId & entity(parse[CommentDTO])) { (postId, userId, comment) =>
+            complete {
+              CommentService
+                .insert(postId, userId, comment)
+                .provide(env)
+            }
           }
         }
       } ~ put {
         (path(Id[PostId]) & userId & entity(parse[PostDTO])) { (postId, userId, post) =>
-          complete {
-            PostService
-              .update(postId, userId, post)
-              .provide(env)
+          pathEnd {
+            complete {
+              PostService
+                .update(postId, userId, post)
+                .provide(env)
+            }
+          }
+        } ~ {
+          (userId & path(Id[PostId] / "comments" / Id[CommentId]) & entity(parse[CommentDTO])) { (userId, postId, commentId, comment) =>
+            complete {
+              CommentService
+                .update(userId, postId, commentId, comment)
+                .provide(env)
+            }
           }
         }
       }

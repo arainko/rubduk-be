@@ -33,8 +33,8 @@ object CommentService {
     CommentRepository.insert(postId, commentToInsert).orDieWith(ServerError)
   }
 
-  def update(commentId: CommentId, comment: CommentDTO): ZIO[CommentRepository, CommentError, Unit] =
-    CommentRepository.update(commentId, comment.contents)
+  def update(userId: UserId, postId: PostId, commentId: CommentId, comment: CommentDTO): ZIO[CommentRepository, CommentError, Unit] =
+    CommentRepository.update(userId, postId, commentId, comment.contents)
       .orDieWith(ServerError)
       .reject { case 0 => CommentNotFound }
       .unit

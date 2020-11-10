@@ -1,7 +1,7 @@
 package io.rubduk.domain.repositories.live
 
 import io.rubduk.domain.repositories.CommentRepository
-import io.rubduk.infrastructure.models.{CommentDAO, CommentId, Limit, Offset, Page, PostId, RowCount}
+import io.rubduk.infrastructure.models.{CommentDAO, CommentId, Limit, Offset, Page, PostId, RowCount, UserId}
 import io.rubduk.infrastructure.tables.Comments
 import slick.interop.zio.DatabaseProvider
 import slick.interop.zio.syntax._
@@ -13,9 +13,8 @@ class CommentRepositoryLive(env: DatabaseProvider) extends CommentRepository.Ser
   override def getById(postId: PostId, commentId: CommentId): Task[Option[CommentDAO]] =
     ZIO.fromDBIO {
       Comments.table
-        .filter {
-          comment => comment.id === commentId && comment.postId === postId
-        }.result
+        .filter {comment => comment.id === commentId && comment.postId === postId}
+        .result
         .headOption
     }.provide(env)
 
@@ -46,9 +45,10 @@ class CommentRepositoryLive(env: DatabaseProvider) extends CommentRepository.Ser
       Comments.table.returning(Comments.table.map(_.id)) += comment
     }.provide(env)
 
-  override def update(commentId: CommentId, contents: String): Task[RowCount] =
+  override def update(userId: UserId, postId: PostId, commentId: CommentId, contents: String): Task[RowCount] =
     ZIO.fromDBIO {
       Comments.table
+        .filter {comment => comment.id === commentId && comment.postId === postId && comment.userId === userId}
         .map(_.contents)
         .update(contents)
     }.provide(env)
