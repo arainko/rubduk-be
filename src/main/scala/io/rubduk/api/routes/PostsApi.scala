@@ -62,6 +62,17 @@ class PostsApi(env: PostRepository with UserRepository with CommentRepository) e
               }
             }
           }
+        } ~ path(Id[PostId] / "comments" / Id[CommentId]) {
+          (postId, commentId) => {
+            pathEnd {
+              complete {
+                CommentService
+                  .getById(commentId)
+                  .map(_.toDTO)
+                  .provide(env)
+              }
+            }
+          }
         }
       } ~ post {
         (userId & entity(parse[PostDTO])) { (userId, post) =>
