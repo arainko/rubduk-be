@@ -38,8 +38,7 @@ object UserService {
   def insert(user: UserDTO): ZIO[UserRepository, Throwable, UserId] =
     UserRepository.getByEmail(user.email)
       .filterOrFail(_.isEmpty)(UserAlreadyExists)
-      .flatMap { _ => UserRepository.insert(user.toDAO(OffsetDateTime.now)) }
-
+      .zipRight(UserRepository.insert(user.toDAO(OffsetDateTime.now)))
 
   def update(userId: UserId, user: UserDTO): ZIO[UserRepository, UserError, Unit] = {
     for {

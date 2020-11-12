@@ -11,11 +11,11 @@ import io.rubduk.domain.services.UserService
 import io.rubduk.infrastructure.converters.IdConverter.{Id, _}
 import io.rubduk.infrastructure.models.{Limit, Offset, UserDTO, UserId}
 
-object UserApi {
-  def apply(env: UserRepository): Route = new UserApi(env).routes
+object UsersApi {
+  def apply(env: UserRepository): Route = new UsersApi(env).routes
 }
 
-class UserApi(env: UserRepository) extends Api.Service {
+class UsersApi(env: UserRepository) extends Api.Service {
   override def routes: Route = pathPrefix("api" / "users") {
     get {
       parameters(

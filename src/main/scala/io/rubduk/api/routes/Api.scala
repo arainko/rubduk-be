@@ -1,10 +1,9 @@
 package io.rubduk.api.routes
 
 import akka.http.interop.{HttpServer, ZIOSupport}
-import akka.http.scaladsl.server.Directives.{complete, path}
 import akka.http.scaladsl.server.Route
 import io.rubduk.api.Api
-import io.rubduk.domain.{PostRepository, UserRepository}
+import io.rubduk.domain.{PostRepository, UserRepository, CommentRepository}
 import zio.config.ZConfig
 import zio.{URIO, ZIO, ZLayer}
 import akka.http.scaladsl.server.Directives._
@@ -15,9 +14,9 @@ object Api {
     def routes: Route
   }
 
-  val live: ZLayer[ZConfig[HttpServer.Config] with PostRepository with UserRepository, Nothing, Api] = ZLayer.fromFunction { env =>
+  val live: ZLayer[ZConfig[HttpServer.Config] with PostRepository with UserRepository with CommentRepository, Nothing, Api] = ZLayer.fromFunction { env =>
     new Service {
-      def routes: Route = PostsApi(env) ~ UserApi(env)
+      def routes: Route = PostsApi(env) ~ UsersApi(env)
     }
   }
 
