@@ -1,6 +1,8 @@
 package io.rubduk.domain.errors
 
-sealed trait ApplicationError extends Exception
+import scala.util.control.NoStackTrace
+
+sealed trait ApplicationError extends NoStackTrace
 
 object ApplicationError {
   sealed trait DomainError extends ApplicationError

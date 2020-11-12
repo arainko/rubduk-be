@@ -16,7 +16,6 @@ import io.rubduk.infrastructure.converters.IdConverter.Id
 import zio.{Runtime => _}
 import io.rubduk.infrastructure.models.{CommentDTO, CommentId, Limit, Offset, PostDTO, PostId}
 
-
 object PostsApi {
   def apply(env: PostRepository with UserRepository with CommentRepository): Route = new PostsApi(env).routes
 }
@@ -47,31 +46,27 @@ class PostsApi(env: PostRepository with UserRepository with CommentRepository) e
                 .provide(env)
             }
           }
-        } ~ path(Id[PostId] / "comments") {
-          postId => {
-            pathEnd {
-              complete {
-                CommentService
-                  .getByPostId(postId, Offset(0), Limit(10))
-                  .map(_.map(_.toDTO))
-                  .provide(env)
-              }
+        } ~ path(Id[PostId] / "comments") { postId =>
+          pathEnd {
+            complete {
+              CommentService
+                .getByPostId(postId, Offset(0), Limit(10))
+                .map(_.map(_.toDTO))
+                .provide(env)
             }
           }
-        } ~ path(Id[PostId] / "comments" / Id[CommentId]) {
-          (postId, commentId) => {
-            pathEnd {
-              complete {
-                CommentService
-                  .getById(postId, commentId)
-                  .map(_.toDTO)
-                  .provide(env)
-              }
+        } ~ path(Id[PostId] / "comments" / Id[CommentId]) { (postId, commentId) =>
+          pathEnd {
+            complete {
+              CommentService
+                .getById(postId, commentId)
+                .map(_.toDTO)
+                .provide(env)
             }
           }
         }
-      } ~ post {
-        (userId & entity(parse[PostDTO])) { (userId, post) =>
+      } ~ (post & userId) { userId =>
+        entity(parse[PostDTO]) { post =>
           pathEnd {
             complete {
               PostService
@@ -79,8 +74,8 @@ class PostsApi(env: PostRepository with UserRepository with CommentRepository) e
                 .provide(env)
             }
           }
-        } ~ {
-          (path(Id[PostId] / "comments") & userId & entity(parse[CommentDTO])) { (postId, userId, comment) =>
+        } ~ path(Id[PostId] / "comments") { postId =>
+          entity(parse[CommentDTO]) { comment =>
             complete {
               CommentService
                 .insert(postId, userId, comment)
@@ -88,8 +83,8 @@ class PostsApi(env: PostRepository with UserRepository with CommentRepository) e
             }
           }
         }
-      } ~ put {
-        (path(Id[PostId]) & userId & entity(parse[PostDTO])) { (postId, userId, post) =>
+      } ~ (put & userId) { userId =>
+        (path(Id[PostId]) & entity(parse[PostDTO])) { (postId, post) =>
           pathEnd {
             complete {
               PostService
@@ -97,8 +92,8 @@ class PostsApi(env: PostRepository with UserRepository with CommentRepository) e
                 .provide(env)
             }
           }
-        } ~ {
-          (userId & path(Id[PostId] / "comments" / Id[CommentId]) & entity(parse[CommentDTO])) { (userId, postId, commentId, comment) =>
+        } ~ path(Id[PostId] / "comments" / Id[CommentId]) { (postId, commentId) =>
+          entity(parse[CommentDTO]) { comment =>
             complete {
               CommentService
                 .update(userId, postId, commentId, comment)
