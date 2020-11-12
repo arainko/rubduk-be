@@ -14,9 +14,10 @@ final case class PostDAO(
   dateAdded: OffsetDateTime
 ) {
   def toDomain(user: User): Post =
-    this.into[Post]
-    .withFieldConst(_.user, user)
-    .transform
+    this
+      .into[Post]
+      .withFieldConst(_.user, user)
+      .transform
 }
 
 final case class Post(
@@ -26,13 +27,15 @@ final case class Post(
   dateAdded: OffsetDateTime
 ) {
   def toDAO(userId: UserId): PostDAO =
-    this.into[PostDAO]
+    this
+      .into[PostDAO]
       .withFieldRenamed(_.user, _.userId)
       .withFieldConst(_.userId, userId)
       .transform
 
   def toDTO: PostDTO =
-    this.into[PostDTO]
+    this
+      .into[PostDTO]
       .withFieldComputed(_.dateAdded, _.dateAdded.some)
       .withFieldComputed(_.userId, _.user.id)
       .transform
@@ -45,7 +48,8 @@ final case class PostDTO(
   dateAdded: Option[OffsetDateTime]
 ) {
   def toDomain(user: User, dateAdded: OffsetDateTime): Post =
-    this.into[Post]
+    this
+      .into[Post]
       .withFieldConst(_.user, user)
       .withFieldConst(_.dateAdded, dateAdded)
       .transform

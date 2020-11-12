@@ -3,7 +3,7 @@ package io.rubduk.infrastructure.tables
 import java.time.OffsetDateTime
 
 import io.rubduk.infrastructure.converters.IdConverter._
-import io.rubduk.infrastructure.models.{PostDAO, PostId, UserId}
+import io.rubduk.infrastructure.models.{ PostDAO, PostId, UserId }
 import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
 
 object Posts {

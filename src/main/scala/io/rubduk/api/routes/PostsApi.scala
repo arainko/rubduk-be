@@ -2,19 +2,19 @@ package io.rubduk.api.routes
 
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
-import akka.http.scaladsl.server.directives.MarshallingDirectives.{as => parse}
+import akka.http.scaladsl.server.directives.MarshallingDirectives.{ as => parse }
 import cats.syntax.functor._
 import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
 import io.circe.generic.auto._
 import io.rubduk.api.custom.PlaceholderDirectives._
-import io.rubduk.api.serializers.Unmarshallers.{limit, offset}
+import io.rubduk.api.serializers.Unmarshallers.{ limit, offset }
 import io.rubduk.domain.services.PostService
 import io.rubduk.domain.services.CommentService
-import io.rubduk.domain.{CommentRepository, PostRepository, UserRepository}
+import io.rubduk.domain.{ CommentRepository, PostRepository, UserRepository }
 import io.rubduk.infrastructure.converters.IdConverter.idCodec
 import io.rubduk.infrastructure.converters.IdConverter.Id
-import zio.{Runtime => _}
-import io.rubduk.infrastructure.models.{CommentDTO, CommentId, Limit, Offset, PostDTO, PostId}
+import zio.{ Runtime => _ }
+import io.rubduk.infrastructure.models.{ CommentDTO, CommentId, Limit, Offset, PostDTO, PostId }
 
 object PostsApi {
   def apply(env: PostRepository with UserRepository with CommentRepository): Route = new PostsApi(env).routes

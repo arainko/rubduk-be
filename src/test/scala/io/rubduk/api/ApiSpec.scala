@@ -4,7 +4,7 @@ import akka.http.interop.HttpServer
 import akka.http.scaladsl.marshalling.Marshal
 import akka.http.scaladsl.model._
 import akka.http.scaladsl.server.Route
-import akka.stream.scaladsl.{Framing, Sink, Source}
+import akka.stream.scaladsl.{ Framing, Sink, Source }
 import akka.util.ByteString
 import io.rubduk.api.JsonSupport._
 import io.rubduk.api.routes.Api
@@ -89,9 +89,10 @@ object ApiSpec extends ZioRouteTest {
                         })
           contentsCheck <- assertM(allItems)(hasSameElements(items.take(1)))
         } yield resultCheck && contentsCheck
-      }   ) @@ TestAspect.sequential
+      }
+    ) @@ TestAspect.sequential
 
-  def firstNElements(request: HttpRequest, route: Route)(n: Long): Task[Seq[String]] =
+  def firstNElements(request: HttpRequest, route: Route)(n: Long): IO[ServerError, Seq[String]] =
     ZIO.fromFuture(_ =>
       Source
         .single(request)

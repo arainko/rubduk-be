@@ -2,7 +2,7 @@ package io.rubduk.infrastructure.models
 
 import io.scalaland.chimney.dsl._
 
-import java.time.{LocalDate, OffsetDateTime}
+import java.time.{ LocalDate, OffsetDateTime }
 
 final case class UserId(value: Long) extends AnyVal
 
@@ -39,12 +39,14 @@ final case class UserDTO(
   createdOn: Option[OffsetDateTime]
 ) {
   def toDAO(createdOn: OffsetDateTime): UserDAO =
-    this.into[UserDAO]
+    this
+      .into[UserDAO]
       .withFieldConst(_.createdOn, createdOn)
       .transform
 
   def toDomain(createdOn: OffsetDateTime): User =
-    this.into[User]
+    this
+      .into[User]
       .withFieldConst(_.createdOn, createdOn)
       .transform
 }

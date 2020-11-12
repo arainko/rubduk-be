@@ -6,7 +6,7 @@ sealed trait ApplicationError extends NoStackTrace
 
 object ApplicationError {
   sealed trait DomainError extends ApplicationError
-  trait EntityError extends DomainError
+  trait EntityError        extends DomainError
 
   final case class ServerError(message: String) extends ApplicationError
 
@@ -15,4 +15,3 @@ object ApplicationError {
       ServerError(throwable.getMessage)
   }
 }
-
