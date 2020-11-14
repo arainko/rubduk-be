@@ -3,18 +3,16 @@ package io.rubduk
 import akka.actor.ActorSystem
 import akka.http.interop._
 import akka.http.scaladsl.server.Route
-import com.typesafe.config.{Config, ConfigFactory}
+import com.typesafe.config.{ Config, ConfigFactory }
 import io.rubduk.api._
 import io.rubduk.api.routes.Api
 import io.rubduk.config.AppConfig
-import io.rubduk.domain.repositories.{PostRepository, UserRepository, CommentRepository}
+import io.rubduk.domain.repositories.{ CommentRepository, PostRepository, UserRepository }
 import slick.interop.zio.DatabaseProvider
+import slick.jdbc.PostgresProfile
 import zio._
 import zio.config.typesafe.TypesafeConfig
 import zio.console._
-import zio.logging._
-import zio.logging.slf4j._
-import slick.jdbc.PostgresProfile
 
 object Boot extends App {
 
@@ -34,8 +32,8 @@ object Boot extends App {
     val dbBackendLayer = ZLayer.succeed(PostgresProfile.backend)
     val repositoryLayer =
       (dbConfigLayer ++ dbBackendLayer) >>>
-      DatabaseProvider.live >>>
-      (PostRepository.live ++ UserRepository.live ++ CommentRepository.live)
+        DatabaseProvider.live >>>
+        (PostRepository.live ++ UserRepository.live ++ CommentRepository.live)
 
     // narrowing down to the required part of the config to ensure separation of concerns
     val apiConfigLayer = configLayer.map(c => Has(c.get.api))
@@ -44,13 +42,14 @@ object Boot extends App {
       ZManaged.make(ZIO(ActorSystem("rubduk-system")))(s => ZIO.fromFuture(_ => s.terminate()).either)
     }
 
-    val loggingLayer: ULayer[Logging] = Slf4jLogger.make { (context, message) =>
-      val logFormat = "[correlation-id = %s] %s"
-      val correlationId = LogAnnotation.CorrelationId.render(
-        context.get(LogAnnotation.CorrelationId)
-      )
-      logFormat.format(correlationId, message)
-    }
+    // Disabled for now
+//    val loggingLayer: ULayer[Logging] = Slf4jLogger.make { (context, message) =>
+//      val logFormat = "[correlation-id = %s] %s"
+//      val correlationId = LogAnnotation.CorrelationId.render(
+//        context.get(LogAnnotation.CorrelationId)
+//      )
+//      logFormat.format(correlationId, message)
+//    }
 
     val apiLayer: TaskLayer[Api] = apiConfigLayer ++ repositoryLayer >>> Api.live
 

@@ -1,7 +1,7 @@
 package io.rubduk.api.serializers
 
 import akka.http.scaladsl.unmarshalling.Unmarshaller
-import io.rubduk.infrastructure.models.{Limit, Offset}
+import io.rubduk.infrastructure.models.{ Limit, Offset }
 
 object Unmarshallers {
   val offset: Unmarshaller[String, Offset] =

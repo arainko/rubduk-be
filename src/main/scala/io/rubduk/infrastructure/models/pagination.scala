@@ -15,8 +15,7 @@ object Page {
   Link: https://typelevel.org/cats/typeclasses/functor.html
    */
   implicit val pageFunctor: Functor[Page] = new Functor[Page] {
-    override def map[A, B](fa: Page[A])(f: A => B): Page[B] = {
+    override def map[A, B](fa: Page[A])(f: A => B): Page[B] =
       fa.copy(entities = fa.entities.map(f))
-    }
   }
 }

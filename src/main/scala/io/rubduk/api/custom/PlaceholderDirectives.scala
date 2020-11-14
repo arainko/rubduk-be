@@ -9,8 +9,9 @@ import io.rubduk.infrastructure.models.UserId
 object PlaceholderDirectives {
   def userId: Directive1[UserId] =
     optionalHeaderValueByName("User-Id").flatMap { header =>
-      header.flatMap(_.toLongOption.map(UserId))
+      header
+        .flatMap(_.toLongOption.map(UserId))
         .map(provide)
-        .getOrElse { reject(Rejections.authorizationFailed) }
+        .getOrElse(reject(Rejections.authorizationFailed))
     }
 }

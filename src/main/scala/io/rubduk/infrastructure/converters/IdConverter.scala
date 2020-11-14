@@ -1,11 +1,11 @@
 package io.rubduk.infrastructure.converters
 
-import io.rubduk.infrastructure.models.{CommentId, PostId, UserId}
+import io.rubduk.infrastructure.models.{ CommentId, PostId, UserId }
 import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 import io.circe.Decoder.Result
-import io.circe.{Codec, Decoder, Encoder, HCursor, Json}
+import io.circe.{ Codec, Decoder, Encoder, HCursor, Json }
 
 import scala.reflect.ClassTag
 
@@ -42,12 +42,14 @@ object IdConverter {
   def Id[A: IdConverter]: PathMatcher1[A] = LongNumber.map(IdConverter[A].fromLong)
 
   implicit def idCodec[A: IdConverter]: Codec[A] = new Codec[A] {
-    override def apply(a: A): Json = Encoder.encodeLong
-      .contramap(IdConverter[A].toLong)
-      .apply(a)
+    override def apply(a: A): Json =
+      Encoder.encodeLong
+        .contramap(IdConverter[A].toLong)
+        .apply(a)
 
-    override def apply(c: HCursor): Result[A] = Decoder.decodeLong
-      .map(IdConverter[A].fromLong)
-      .apply(c)
+    override def apply(c: HCursor): Result[A] =
+      Decoder.decodeLong
+        .map(IdConverter[A].fromLong)
+        .apply(c)
   }
 }

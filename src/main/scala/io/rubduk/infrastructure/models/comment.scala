@@ -33,7 +33,8 @@ case class CommentDTO(
   contents: String
 ) {
   def toDomain(postId: PostId, userId: UserId, dateAdded: OffsetDateTime): Comment =
-    this.into[Comment]
+    this
+      .into[Comment]
       .withFieldConst(_.postId, postId)
       .withFieldConst(_.userId, userId)
       .withFieldConst(_.dateAdded, dateAdded)

@@ -1,11 +1,12 @@
 package io.rubduk.domain.repositories
 
 import io.rubduk.domain.UserRepository
+import io.rubduk.domain.errors.ApplicationError.ServerError
 import io.rubduk.domain.repositories.live.UserRepositoryLive
 import io.rubduk.infrastructure.models._
 import slick.interop.zio.DatabaseProvider
 import zio.macros.accessible
-import zio.{Task, URLayer, ZLayer}
+import zio.{ IO, URLayer, ZLayer }
 
 /*
 This annotation will generate a static method for each method of the UserRepository.Service trait,
@@ -34,13 +35,13 @@ object UserRepository {
   trait, it's just a best practice to name them like that).
    */
   trait Service {
-    def getById(userId: UserId): Task[Option[UserDAO]]
-    def getByEmail(email: String): Task[Option[UserDAO]]
-    def getAllPaginated(offset: Offset, limit: Limit): Task[Page[UserDAO]]
-    def getAll(offset: Offset, limit: Limit): Task[Seq[UserDAO]]
-    def count: Task[RowCount]
-    def insert(user: UserDAO): Task[UserId]
-    def update(userId: UserId, user: UserDAO): Task[RowCount]
+    def getById(userId: UserId): IO[ServerError, Option[UserDAO]]
+    def getByEmail(email: String): IO[ServerError, Option[UserDAO]]
+    def getAllPaginated(offset: Offset, limit: Limit): IO[ServerError, Page[UserDAO]]
+    def getAll(offset: Offset, limit: Limit): IO[ServerError, Seq[UserDAO]]
+    def count: IO[ServerError, RowCount]
+    def insert(user: UserDAO): IO[ServerError, UserId]
+    def update(userId: UserId, user: UserDAO): IO[ServerError, RowCount]
   }
 
   /*

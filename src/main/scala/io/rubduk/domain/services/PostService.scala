@@ -2,55 +2,57 @@ package io.rubduk.domain.services
 
 import java.time.OffsetDateTime
 
-import io.rubduk.domain.errors.ApplicationError.{EntityError, ServerError}
-import io.rubduk.domain.errors.PostError.PostNotFound
-import io.rubduk.domain.errors.UserError.UserNotFound
-import io.rubduk.domain.errors.{PostError, UserError}
+import cats.implicits.catsSyntaxOptionId
+import io.rubduk.domain.errors.ApplicationError
+import io.rubduk.domain.errors.PostError.{ PostNotByThisUser, PostNotFound }
 import io.rubduk.domain.repositories.PostRepository
-import io.rubduk.domain.{PostRepository, UserRepository}
+import io.rubduk.domain.{ PostRepository, UserRepository }
 import io.rubduk.infrastructure.models._
 import zio.ZIO
 
 object PostService {
 
-  def getById(postId: PostId): ZIO[PostRepository with UserRepository, EntityError, Post] =
+  def getById(postId: PostId): ZIO[PostRepository with UserRepository, ApplicationError, Post] =
     for {
-      post <- PostRepository.getById(postId)
-        .flatMap(ZIO.fromOption(_))
-        .orElseFail(PostNotFound)
+      post <- PostRepository.getById(postId).someOrFail(PostNotFound)
       user <- UserService.getById(post.userId)
     } yield post.toDomain(user)
 
-  def getAllPaginated(offset: Offset, limit: Limit): ZIO[PostRepository with UserRepository, Throwable, Page[Post]] =
+  def getAllPaginated(
+    offset: Offset,
+    limit: Limit
+  ): ZIO[PostRepository with UserRepository, ApplicationError, Page[Post]] =
     for {
       posts <- PostRepository.getAllPaginated(offset, limit)
       postsWithUsers <- ZIO.foreachPar(posts.entities) { post =>
-        UserService.getById(post.userId).map(user => post.toDomain(user))
-      }
+                         UserService.getById(post.userId).map(user => post.toDomain(user))
+                       }
     } yield Page(postsWithUsers, posts.count)
 
-  def getAll(offset: Offset, limit: Limit): ZIO[PostRepository with UserRepository, UserError, Seq[Post]] =
+  def getAll(offset: Offset, limit: Limit): ZIO[PostRepository with UserRepository, ApplicationError, Seq[Post]] =
     for {
-      posts <- PostRepository.getAll(offset, limit).orDieWith(ServerError)
+      posts <- PostRepository.getAll(offset, limit)
       postsWithUsers <- ZIO.foreachPar(posts) { post =>
-        UserService.getById(post.userId).map(user => post.toDomain(user))
-      }
+                         UserService.getById(post.userId).map(user => post.toDomain(user))
+                       }
     } yield postsWithUsers
 
-  def insert(userId: UserId, post: PostDTO): ZIO[PostRepository with UserRepository, UserError, PostId] =
+  def insert(userId: UserId, post: PostDTO): ZIO[PostRepository with UserRepository, ApplicationError, PostId] =
     for {
-      user <- UserService.getById(userId)
-      currentDate = OffsetDateTime.now()
+      user         <- UserService.getById(userId)
+      currentDate  = OffsetDateTime.now()
       postToInsert = post.toDomain(user, currentDate).toDAO(userId)
-      insertedId <- PostRepository.insert(postToInsert).orDieWith(ServerError)
+      insertedId   <- PostRepository.insert(postToInsert)
     } yield insertedId
 
-  def update(postId: PostId, userId: UserId, post: PostDTO): ZIO[PostRepository with UserRepository, EntityError, Unit] =
-    for {
-      postUserId <- PostService.getById(postId).map(_.user.id).someOrFail(UserNotFound)
-      _ <- PostRepository.update(postId, post.contents)
-        .orDieWith(ServerError)
-        .when(postUserId == userId)
-    } yield ()
-
+  def update(
+    postId: PostId,
+    userId: UserId,
+    post: PostDTO
+  ): ZIO[PostRepository with UserRepository, ApplicationError, Unit] =
+    PostService
+      .getById(postId)
+      .filterOrFail(_.user.id == userId.some)(PostNotByThisUser)
+      .zipRight(PostRepository.update(postId, post.contents))
+      .unit
 }
