@@ -32,6 +32,7 @@ case class CommentDTO(
   id: Option[CommentId],
   contents: String
 ) {
+
   def toDomain(postId: PostId, userId: UserId, dateAdded: OffsetDateTime): Comment =
     this
       .into[Comment]

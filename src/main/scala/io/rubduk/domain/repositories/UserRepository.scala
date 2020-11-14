@@ -6,7 +6,7 @@ import io.rubduk.domain.repositories.live.UserRepositoryLive
 import io.rubduk.infrastructure.models._
 import slick.interop.zio.DatabaseProvider
 import zio.macros.accessible
-import zio.{ IO, URLayer, ZLayer }
+import zio.{IO, URLayer, ZLayer}
 
 /*
 This annotation will generate a static method for each method of the UserRepository.Service trait,

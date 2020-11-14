@@ -3,12 +3,12 @@ package io.rubduk.domain.repositories.live
 import io.rubduk.domain.errors.ApplicationError.ServerError
 import io.rubduk.domain.repositories.UserRepository
 import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
-import io.rubduk.infrastructure.converters.IdConverter._
+import io.rubduk.infrastructure.typeclasses.IdConverter._
 import io.rubduk.infrastructure.models._
 import io.rubduk.infrastructure.tables.Users
 import slick.interop.zio.DatabaseProvider
 import slick.interop.zio.syntax._
-import zio.{ IO, ZIO }
+import zio.{IO, ZIO}
 
 /*
 The env: DatabaseProvider is our database layer that our methods will use
@@ -47,21 +47,25 @@ class UserRepositoryLive(env: DatabaseProvider) extends UserRepository.Service {
   execute the query.
    */
   override def getById(userId: UserId): IO[ServerError, Option[UserDAO]] =
-    ZIO.fromDBIO {
-      Users.table
-        .filter(_.id === userId)
-        .result
-        .headOption
-    }.mapError(ServerError)
+    ZIO
+      .fromDBIO {
+        Users.table
+          .filter(_.id === userId)
+          .result
+          .headOption
+      }
+      .mapError(ServerError)
       .provide(env)
 
   override def getByEmail(email: String): IO[ServerError, Option[UserDAO]] =
-    ZIO.fromDBIO {
-      Users.table
-        .filter(_.email === email)
-        .result
-        .headOption
-    }.mapError(ServerError)
+    ZIO
+      .fromDBIO {
+        Users.table
+          .filter(_.email === email)
+          .result
+          .headOption
+      }
+      .mapError(ServerError)
       .provide(env)
 
   /*
@@ -74,32 +78,40 @@ class UserRepositoryLive(env: DatabaseProvider) extends UserRepository.Service {
     }
 
   override def getAll(offset: Offset, limit: Limit): IO[ServerError, Seq[UserDAO]] =
-    ZIO.fromDBIO {
-      Users.table
-        .drop(offset.value)
-        .take(limit.value)
-        .result
-    }.mapError(ServerError)
+    ZIO
+      .fromDBIO {
+        Users.table
+          .drop(offset.value)
+          .take(limit.value)
+          .result
+      }
+      .mapError(ServerError)
       .provide(env)
 
   override def count: IO[ServerError, RowCount] =
-    ZIO.fromDBIO {
-      Users.table.length.result
-    }.mapError(ServerError)
+    ZIO
+      .fromDBIO {
+        Users.table.length.result
+      }
+      .mapError(ServerError)
       .provide(env)
 
   override def insert(user: UserDAO): IO[ServerError, UserId] =
-    ZIO.fromDBIO {
-      Users.table.returning(Users.table.map(_.id)) += user
-    }.mapError(ServerError)
+    ZIO
+      .fromDBIO {
+        Users.table.returning(Users.table.map(_.id)) += user
+      }
+      .mapError(ServerError)
       .provide(env)
 
   override def update(userId: UserId, user: UserDAO): IO[ServerError, RowCount] =
-    ZIO.fromDBIO {
-      Users.table
-        .filter(_.id === userId)
-        .map(u => (u.name, u.lastName, u.dateOfBirth))
-        .update((user.name, user.lastName, user.dateOfBirth))
-    }.mapError(ServerError)
+    ZIO
+      .fromDBIO {
+        Users.table
+          .filter(_.id === userId)
+          .map(u => (u.name, u.lastName, u.dateOfBirth))
+          .update((user.name, user.lastName, user.dateOfBirth))
+      }
+      .mapError(ServerError)
       .provide(env)
 }

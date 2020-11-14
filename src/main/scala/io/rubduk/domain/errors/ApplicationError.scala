@@ -11,6 +11,7 @@ object ApplicationError {
   final case class ServerError(message: String) extends ApplicationError
 
   object ServerError extends (Throwable => ServerError) {
+
     def apply(throwable: Throwable): ServerError =
       ServerError(throwable.getMessage)
   }

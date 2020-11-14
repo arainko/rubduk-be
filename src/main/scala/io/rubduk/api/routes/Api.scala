@@ -1,11 +1,11 @@
 package io.rubduk.api.routes
 
-import akka.http.interop.{ HttpServer, ZIOSupport }
+import akka.http.interop.{HttpServer, ZIOSupport}
 import akka.http.scaladsl.server.Route
 import io.rubduk.api.Api
-import io.rubduk.domain.{ CommentRepository, PostRepository, UserRepository }
+import io.rubduk.domain.{CommentRepository, PostRepository, UserRepository}
 import zio.config.ZConfig
-import zio.{ URIO, ZIO, ZLayer }
+import zio.{URIO, ZIO, ZLayer}
 import akka.http.scaladsl.server.Directives._
 
 object Api {

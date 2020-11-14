@@ -6,10 +6,11 @@ import io.rubduk.domain.repositories.live.CommentRepositoryLive
 import io.rubduk.infrastructure.models._
 import slick.interop.zio.DatabaseProvider
 import zio.macros.accessible
-import zio.{ IO, URLayer, ZLayer }
+import zio.{IO, URLayer, ZLayer}
 
 @accessible
 object CommentRepository {
+
   trait Service {
     def getById(commentId: CommentId): IO[ServerError, Option[CommentDAO]]
     def getByPostIdPaginated(postId: PostId, offset: Offset, limit: Limit): IO[ServerError, Page[CommentDAO]]
