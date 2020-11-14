@@ -8,6 +8,8 @@ val zioLoggingVersion = "0.5.1"
 val zioConfigVersion  = "1.0.0-RC27"
 val circeVersion      = "0.12.3"
 
+val TestItTest = "it, test"
+
 val dockerReleaseSettings = Seq(
   dockerExposedPorts := Seq(8080),
   dockerExposedVolumes := Seq("/opt/docker/logs"),
@@ -52,12 +54,14 @@ val root = (project in file("."))
       "io.circe"            %% "circe-generic"               % circeVersion,
       "io.circe"            %% "circe-parser"                % circeVersion,
       "io.circe"            %% "circe-generic-extras"        % "0.13.0",
-      "com.typesafe.akka"   %% "akka-http-testkit"           % akkaHttpVersion    % Test,
-      "com.typesafe.akka"   %% "akka-stream-testkit"         % akkaVersion        % Test,
-      "com.typesafe.akka"   %% "akka-actor-testkit-typed"    % akkaVersion        % Test,
-      "dev.zio"             %% "zio-test-sbt"                % zioVersion         % Test
+      "com.typesafe.akka"   %% "akka-http-testkit"           % akkaHttpVersion    % TestItTest,
+      "com.typesafe.akka"   %% "akka-stream-testkit"         % akkaVersion        % TestItTest,
+      "com.typesafe.akka"   %% "akka-actor-testkit-typed"    % akkaVersion        % TestItTest,
+      "dev.zio"             %% "zio-test-sbt"                % zioVersion         % TestItTest
     ),
     testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")),
     dockerReleaseSettings
   )
+  .configs(IntegrationTest)
+  .settings(Defaults.itSettings)
   .enablePlugins(DockerPlugin, JavaAppPackaging, FlywayPlugin)
