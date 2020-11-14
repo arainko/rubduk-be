@@ -51,10 +51,11 @@ val root = (project in file("."))
       "io.circe"            %% "circe-core"                  % circeVersion,
       "io.circe"            %% "circe-generic"               % circeVersion,
       "io.circe"            %% "circe-parser"                % circeVersion,
-      "com.typesafe.akka"   %% "akka-http-testkit"           % akkaHttpVersion % Test,
-      "com.typesafe.akka"   %% "akka-stream-testkit"         % akkaVersion     % Test,
-      "com.typesafe.akka"   %% "akka-actor-testkit-typed"    % akkaVersion     % Test,
-      "dev.zio"             %% "zio-test-sbt"                % zioVersion      % Test
+      "io.circe"            %% "circe-generic-extras"        % "0.13.0",
+      "com.typesafe.akka"   %% "akka-http-testkit"           % akkaHttpVersion    % Test,
+      "com.typesafe.akka"   %% "akka-stream-testkit"         % akkaVersion        % Test,
+      "com.typesafe.akka"   %% "akka-actor-testkit-typed"    % akkaVersion        % Test,
+      "dev.zio"             %% "zio-test-sbt"                % zioVersion         % Test
     ),
     testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")),
     dockerReleaseSettings

@@ -13,6 +13,7 @@ final case class PostDAO(
   userId: UserId,
   dateAdded: OffsetDateTime
 ) {
+
   def toDomain(user: User): Post =
     this
       .into[Post]
@@ -26,6 +27,7 @@ final case class Post(
   user: User,
   dateAdded: OffsetDateTime
 ) {
+
   def toDAO(userId: UserId): PostDAO =
     this
       .into[PostDAO]
@@ -47,6 +49,7 @@ final case class PostDTO(
   userId: Option[UserId],
   dateAdded: Option[OffsetDateTime]
 ) {
+
   def toDomain(user: User, dateAdded: OffsetDateTime): Post =
     this
       .into[Post]

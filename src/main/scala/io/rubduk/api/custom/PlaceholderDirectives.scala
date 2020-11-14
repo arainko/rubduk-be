@@ -7,6 +7,7 @@ import io.rubduk.infrastructure.models.UserId
 
 // Here until we get an actual auth implementation
 object PlaceholderDirectives {
+
   def userId: Directive1[UserId] =
     optionalHeaderValueByName("User-Id").flatMap { header =>
       header

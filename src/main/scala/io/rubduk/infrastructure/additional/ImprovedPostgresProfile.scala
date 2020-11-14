@@ -31,6 +31,7 @@ trait ImprovedPostgresProfile
       with HStoreImplicits
       with SearchImplicits
       with SearchAssistants {
+
     implicit val strListTypeMapper =
       new SimpleArrayJdbcType[String]("text").to(_.toList)
   }

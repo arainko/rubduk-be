@@ -6,7 +6,7 @@ import cats.syntax.functor._
 import io.rubduk.domain.UserRepository
 import io.rubduk.domain.errors.ApplicationError
 import io.rubduk.domain.errors.ApplicationError.ServerError
-import io.rubduk.domain.errors.UserError.{ UserAlreadyExists, UserNotFound }
+import io.rubduk.domain.errors.UserError.{UserAlreadyExists, UserNotFound}
 import io.rubduk.domain.repositories.UserRepository
 import io.rubduk.infrastructure.models.Page._
 import io.rubduk.infrastructure.models._
@@ -45,8 +45,8 @@ object UserService {
 
   def update(userId: UserId, user: UserDTO): ZIO[UserRepository, ApplicationError, Unit] =
     for {
-      fetchedUser       <- UserService.getById(userId)
+      fetchedUser <- UserService.getById(userId)
       originalCreatedOn = fetchedUser.createdOn
-      _                 <- UserRepository.update(userId, user.toDAO(originalCreatedOn))
+      _ <- UserRepository.update(userId, user.toDAO(originalCreatedOn))
     } yield ()
 }

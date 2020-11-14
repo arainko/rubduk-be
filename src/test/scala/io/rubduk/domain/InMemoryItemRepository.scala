@@ -6,6 +6,7 @@ import zio.stream.ZStream
 
 final class InMemoryItemRepository(storage: Ref[List[Item]], deletedEventsSubscribers: Ref[List[Queue[ItemId]]])
     extends ItemRepository.Service {
+
   def add(data: ItemData): IO[RepositoryError, ItemId] =
     storage.modify { items =>
       val nextId = ItemId(
@@ -46,12 +47,13 @@ final class InMemoryItemRepository(storage: Ref[List[Item]], deletedEventsSubscr
   def getCheaperThan(price: BigDecimal): IO[RepositoryError, List[Item]] =
     getAll.map(_.filter(_.price < price))
 
-  def deletedEvents: ZStream[Any, Nothing, ItemId] = ZStream.unwrap {
-    for {
-      queue <- Queue.unbounded[ItemId]
-      _     <- deletedEventsSubscribers.update(queue :: _)
-    } yield ZStream.fromQueue(queue)
-  }
+  def deletedEvents: ZStream[Any, Nothing, ItemId] =
+    ZStream.unwrap {
+      for {
+        queue <- Queue.unbounded[ItemId]
+        _     <- deletedEventsSubscribers.update(queue :: _)
+      } yield ZStream.fromQueue(queue)
+    }
 
   private def publishDeletedEvents(deletedItemId: ItemId): UIO[List[Boolean]] =
     deletedEventsSubscribers.get.flatMap(subs =>

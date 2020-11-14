@@ -3,11 +3,11 @@ package io.rubduk
 import akka.actor.ActorSystem
 import akka.http.interop._
 import akka.http.scaladsl.server.Route
-import com.typesafe.config.{ Config, ConfigFactory }
+import com.typesafe.config.{Config, ConfigFactory}
 import io.rubduk.api._
 import io.rubduk.api.routes.Api
 import io.rubduk.config.AppConfig
-import io.rubduk.domain.repositories.{ CommentRepository, PostRepository, UserRepository }
+import io.rubduk.domain.repositories.{CommentRepository, PostRepository, UserRepository}
 import slick.interop.zio.DatabaseProvider
 import slick.jdbc.PostgresProfile
 import zio._

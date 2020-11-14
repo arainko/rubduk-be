@@ -6,10 +6,11 @@ import io.rubduk.domain.repositories.live.PostRepositoryLive
 import io.rubduk.infrastructure.models._
 import slick.interop.zio.DatabaseProvider
 import zio.macros.accessible
-import zio.{ IO, URLayer, ZLayer }
+import zio.{IO, URLayer, ZLayer}
 
 @accessible
 object PostRepository {
+
   trait Service {
     def getById(postId: PostId): IO[ServerError, Option[PostDAO]]
     def getAllPaginated(offset: Offset, limit: Limit): IO[ServerError, Page[PostDAO]]

@@ -4,9 +4,9 @@ import java.time.OffsetDateTime
 
 import cats.implicits.catsSyntaxOptionId
 import io.rubduk.domain.errors.ApplicationError
-import io.rubduk.domain.errors.PostError.{ PostNotByThisUser, PostNotFound }
+import io.rubduk.domain.errors.PostError.{PostNotByThisUser, PostNotFound}
 import io.rubduk.domain.repositories.PostRepository
-import io.rubduk.domain.{ PostRepository, UserRepository }
+import io.rubduk.domain.{PostRepository, UserRepository}
 import io.rubduk.infrastructure.models._
 import zio.ZIO
 
@@ -25,24 +25,24 @@ object PostService {
     for {
       posts <- PostRepository.getAllPaginated(offset, limit)
       postsWithUsers <- ZIO.foreachPar(posts.entities) { post =>
-                         UserService.getById(post.userId).map(user => post.toDomain(user))
-                       }
+        UserService.getById(post.userId).map(user => post.toDomain(user))
+      }
     } yield Page(postsWithUsers, posts.count)
 
   def getAll(offset: Offset, limit: Limit): ZIO[PostRepository with UserRepository, ApplicationError, Seq[Post]] =
     for {
       posts <- PostRepository.getAll(offset, limit)
       postsWithUsers <- ZIO.foreachPar(posts) { post =>
-                         UserService.getById(post.userId).map(user => post.toDomain(user))
-                       }
+        UserService.getById(post.userId).map(user => post.toDomain(user))
+      }
     } yield postsWithUsers
 
   def insert(userId: UserId, post: PostDTO): ZIO[PostRepository with UserRepository, ApplicationError, PostId] =
     for {
-      user         <- UserService.getById(userId)
+      user <- UserService.getById(userId)
       currentDate  = OffsetDateTime.now()
       postToInsert = post.toDomain(user, currentDate).toDAO(userId)
-      insertedId   <- PostRepository.insert(postToInsert)
+      insertedId <- PostRepository.insert(postToInsert)
     } yield insertedId
 
   def update(
