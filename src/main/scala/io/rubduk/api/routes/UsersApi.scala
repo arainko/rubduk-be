@@ -17,6 +17,7 @@ object UsersApi {
 class UsersApi(env: UserRepository) extends Api.Service {
   import io.rubduk.api.serializers.codecs._
   import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+  import io.rubduk.domain.errors._
 
   override def routes: Route =
     pathPrefix("api" / "users") {

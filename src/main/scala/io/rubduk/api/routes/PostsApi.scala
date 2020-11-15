@@ -19,6 +19,7 @@ object PostsApi {
 class PostsApi(env: PostRepository with UserRepository with CommentRepository) extends Api.Service {
   import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
   import io.rubduk.api.serializers.codecs._
+  import io.rubduk.domain.errors._
 
   override def routes: Route =
     pathPrefix("api" / "posts") {
@@ -45,12 +46,17 @@ class PostsApi(env: PostRepository with UserRepository with CommentRepository) e
             }
           }
         } ~ path(Id[PostId] / "comments") { postId =>
-          pathEnd {
-            complete {
-              CommentService
-                .getByPostId(postId, Offset(0), Limit(10))
-                .map(_.map(_.toDTO))
-                .provide(env)
+          parameters(
+            "offset".as(offset) ? Offset(0),
+            "limit".as(limit) ? Limit(10)
+          ) { (offset, limit) =>
+            pathEnd {
+              complete {
+                CommentService
+                  .getByPostIdPaginated(postId, offset, limit)
+                  .map(_.map(_.toDTO))
+                  .provide(env)
+              }
             }
           }
         } ~ path(Id[PostId] / "comments" / Id[CommentId]) { (postId, commentId) =>

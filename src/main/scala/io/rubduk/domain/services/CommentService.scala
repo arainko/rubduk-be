@@ -3,11 +3,12 @@ package io.rubduk.domain.services
 import java.time.OffsetDateTime
 
 import cats.syntax.functor._
-import io.rubduk.domain.CommentRepository
+import io.rubduk.domain.{CommentRepository, PostRepository}
 import io.rubduk.domain.errors.ApplicationError
 import io.rubduk.domain.errors.ApplicationError.ServerError
 import io.rubduk.domain.errors.CommentError._
-import io.rubduk.domain.repositories.CommentRepository
+import io.rubduk.domain.errors.PostError.PostNotFound
+import io.rubduk.domain.repositories.{CommentRepository, PostRepository}
 import io.rubduk.infrastructure.models.Page._
 import io.rubduk.infrastructure.models._
 import zio.ZIO
@@ -18,15 +19,24 @@ object CommentService {
     postId: PostId,
     offset: Offset,
     limit: Limit
-  ): ZIO[CommentRepository, ServerError, Page[Comment]] =
-    CommentRepository
-      .getByPostIdPaginated(postId, offset, limit)
-      .map(_.map(_.toDomain))
+  ): ZIO[CommentRepository with PostRepository, ApplicationError, Page[Comment]] =
+    PostRepository
+      .getById(postId)
+      .someOrFail(PostNotFound)
+      .zipRight {
+        CommentRepository.getByPostIdPaginated(postId, offset, limit)
+          .map(_.map(_.toDomain))
+      }
 
-  def getByPostId(postId: PostId, offset: Offset, limit: Limit): ZIO[CommentRepository, ServerError, Seq[Comment]] =
-    CommentRepository
-      .getByPostId(postId, offset, limit)
-      .map(_.map(_.toDomain))
+  def getByPostId(postId: PostId, offset: Offset, limit: Limit): ZIO[CommentRepository with PostRepository, ApplicationError, Seq[Comment]] =
+    PostRepository
+      .getById(postId)
+      .someOrFail(PostNotFound)
+      .zipRight {
+        CommentRepository.getByPostId(postId, offset, limit)
+          .map(_.map(_.toDomain))
+      }
+
 
   def getById(postId: PostId, commentId: CommentId): ZIO[CommentRepository, ApplicationError, Comment] =
     CommentRepository
