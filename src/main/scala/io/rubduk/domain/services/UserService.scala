@@ -2,6 +2,7 @@ package io.rubduk.domain.services
 
 import java.time.OffsetDateTime
 
+import cats.syntax.option._
 import cats.syntax.functor._
 import io.rubduk.domain.UserRepository
 import io.rubduk.domain.errors.ApplicationError
@@ -46,6 +47,11 @@ object UserService {
   def update(userId: UserId, user: UserDTO): ZIO[UserRepository, ApplicationError, Unit] =
     for {
       fetchedUser <- UserService.getById(userId)
+      _ <-
+        UserRepository
+          .getByEmail(user.email)
+          .unrefineTo[ApplicationError]
+          .filterOrFail(_.fold(true)(_.id == userId.some))(UserAlreadyExists)
       originalCreatedOn = fetchedUser.createdOn
       _ <- UserRepository.update(userId, user.toDAO(originalCreatedOn))
     } yield ()
