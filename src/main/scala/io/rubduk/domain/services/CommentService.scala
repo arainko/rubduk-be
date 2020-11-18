@@ -9,8 +9,10 @@ import io.rubduk.domain.errors.ApplicationError.ServerError
 import io.rubduk.domain.errors.CommentError._
 import io.rubduk.domain.errors.PostError.PostNotFound
 import io.rubduk.domain.repositories.{CommentRepository, PostRepository}
+import io.rubduk.infrastructure.additional.Filter
 import io.rubduk.infrastructure.models.Page._
 import io.rubduk.infrastructure.models._
+import io.rubduk.infrastructure.tables.Comments
 import zio.ZIO
 
 object CommentService {
@@ -18,25 +20,32 @@ object CommentService {
   def getByPostIdPaginated(
     postId: PostId,
     offset: Offset,
-    limit: Limit
+    limit: Limit,
+    filters: Filter[Comments.Schema]*
   ): ZIO[CommentRepository with PostRepository, ApplicationError, Page[Comment]] =
     PostRepository
       .getById(postId)
       .someOrFail(PostNotFound)
       .zipRight {
-        CommentRepository.getByPostIdPaginated(postId, offset, limit)
+        CommentRepository
+          .getByPostIdPaginated(postId, offset, limit, filters)
           .map(_.map(_.toDomain))
       }
 
-  def getByPostId(postId: PostId, offset: Offset, limit: Limit): ZIO[CommentRepository with PostRepository, ApplicationError, Seq[Comment]] =
+  def getByPostId(
+    postId: PostId,
+    offset: Offset,
+    limit: Limit,
+    filters: Filter[Comments.Schema]*
+  ): ZIO[CommentRepository with PostRepository, ApplicationError, Seq[Comment]] =
     PostRepository
       .getById(postId)
       .someOrFail(PostNotFound)
       .zipRight {
-        CommentRepository.getByPostId(postId, offset, limit)
+        CommentRepository
+          .getByPostId(postId, offset, limit, filters)
           .map(_.map(_.toDomain))
       }
-
 
   def getById(postId: PostId, commentId: CommentId): ZIO[CommentRepository, ApplicationError, Comment] =
     CommentRepository

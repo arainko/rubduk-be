@@ -7,7 +7,9 @@ import io.rubduk.domain.errors.ApplicationError
 import io.rubduk.domain.errors.PostError.{PostNotByThisUser, PostNotFound}
 import io.rubduk.domain.repositories.PostRepository
 import io.rubduk.domain.{PostRepository, UserRepository}
+import io.rubduk.infrastructure.additional.Filter
 import io.rubduk.infrastructure.models._
+import io.rubduk.infrastructure.tables.Posts
 import zio.ZIO
 
 object PostService {
@@ -20,18 +22,23 @@ object PostService {
 
   def getAllPaginated(
     offset: Offset,
-    limit: Limit
+    limit: Limit,
+    filters: Filter[Posts.Schema]*
   ): ZIO[PostRepository with UserRepository, ApplicationError, Page[Post]] =
     for {
-      posts <- PostRepository.getAllPaginated(offset, limit)
+      posts <- PostRepository.getAllPaginated(offset, limit, filters)
       postsWithUsers <- ZIO.foreachPar(posts.entities) { post =>
         UserService.getById(post.userId).map(user => post.toDomain(user))
       }
     } yield Page(postsWithUsers, posts.count)
 
-  def getAll(offset: Offset, limit: Limit): ZIO[PostRepository with UserRepository, ApplicationError, Seq[Post]] =
+  def getAll(
+    offset: Offset,
+    limit: Limit,
+    filters: Filter[Posts.Schema]*
+  ): ZIO[PostRepository with UserRepository, ApplicationError, Seq[Post]] =
     for {
-      posts <- PostRepository.getAll(offset, limit)
+      posts <- PostRepository.getAll(offset, limit, filters)
       postsWithUsers <- ZIO.foreachPar(posts) { post =>
         UserService.getById(post.userId).map(user => post.toDomain(user))
       }
