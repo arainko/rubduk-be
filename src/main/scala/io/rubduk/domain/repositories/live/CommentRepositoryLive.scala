@@ -2,6 +2,8 @@ package io.rubduk.domain.repositories.live
 
 import io.rubduk.domain.errors.ApplicationError.ServerError
 import io.rubduk.domain.repositories.CommentRepository
+import io.rubduk.infrastructure.additional.Filter
+import io.rubduk.infrastructure.additional.Filter.FilterOps
 import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
 import io.rubduk.infrastructure.typeclasses.IdConverter._
 import io.rubduk.infrastructure.models._
@@ -23,12 +25,22 @@ class CommentRepositoryLive(env: DatabaseProvider) extends CommentRepository.Ser
       .mapError(ServerError)
       .provide(env)
 
-  override def getByPostIdPaginated(postId: PostId, offset: Offset, limit: Limit): IO[ServerError, Page[CommentDAO]] =
-    getByPostId(postId, offset, limit)
-      .zipPar(countByPostId(postId))
+  override def getByPostIdPaginated(
+    postId: PostId,
+    offset: Offset,
+    limit: Limit,
+    filters: Seq[Filter[Comments.Schema]]
+  ): IO[ServerError, Page[CommentDAO]] =
+    getByPostId(postId, offset, limit, filters)
+      .zipPar(countByPostIdFiltered(postId, filters))
       .map { case (comments, count) => Page(comments, count) }
 
-  override def getByPostId(postId: PostId, offset: Offset, limit: Limit): IO[ServerError, Seq[CommentDAO]] =
+  override def getByPostId(
+    postId: PostId,
+    offset: Offset,
+    limit: Limit,
+    filters: Seq[Filter[Comments.Schema]]
+  ): IO[ServerError, Seq[CommentDAO]] =
     ZIO
       .fromDBIO {
         Comments.table
@@ -40,11 +52,12 @@ class CommentRepositoryLive(env: DatabaseProvider) extends CommentRepository.Ser
       .mapError(ServerError)
       .provide(env)
 
-  override def countByPostId(postId: PostId): IO[ServerError, RowCount] =
+  override def countByPostIdFiltered(postId: PostId, filters: Seq[Filter[Comments.Schema]]): IO[ServerError, RowCount] =
     ZIO
       .fromDBIO {
         Comments.table
           .filter(_.postId === postId)
+          .filteredBy(filters)
           .length
           .result
       }

@@ -9,8 +9,10 @@ import io.rubduk.domain.errors.ApplicationError
 import io.rubduk.domain.errors.ApplicationError.ServerError
 import io.rubduk.domain.errors.UserError.{UserAlreadyExists, UserNotFound}
 import io.rubduk.domain.repositories.UserRepository
+import io.rubduk.infrastructure.additional.Filter
 import io.rubduk.infrastructure.models.Page._
 import io.rubduk.infrastructure.models._
+import io.rubduk.infrastructure.tables.Users
 import zio.ZIO
 
 object UserService {
@@ -27,14 +29,22 @@ object UserService {
       .someOrFail(UserNotFound)
       .map(_.toDomain)
 
-  def getAllPaginated(offset: Offset, limit: Limit): ZIO[UserRepository, ServerError, Page[User]] =
+  def getAllPaginated(
+    offset: Offset,
+    limit: Limit,
+    filters: Filter[Users.Schema]*
+  ): ZIO[UserRepository, ServerError, Page[User]] =
     UserRepository
-      .getAllPaginated(offset, limit)
+      .getAllPaginated(offset, limit, filters)
       .map(_.map(_.toDomain))
 
-  def getAll(offset: Offset, limit: Limit): ZIO[UserRepository, ServerError, Seq[User]] =
+  def getAll(
+    offset: Offset,
+    limit: Limit,
+    filters: Filter[Users.Schema]*
+  ): ZIO[UserRepository, ServerError, Seq[User]] =
     UserRepository
-      .getAll(offset, limit)
+      .getAll(offset, limit, filters)
       .map(_.map(_.toDomain))
 
   def insert(user: UserDTO): ZIO[UserRepository, ApplicationError, UserId] =

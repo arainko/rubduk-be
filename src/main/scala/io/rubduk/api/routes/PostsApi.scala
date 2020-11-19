@@ -5,10 +5,11 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.MarshallingDirectives.{as => parse}
 import cats.syntax.functor._
 import io.rubduk.api.custom.PlaceholderDirectives._
-import io.rubduk.api.serializers.unmarshallers.{limit, offset}
+import io.rubduk.api.serializers.unmarshallers.{IdParam, limit, offset}
 import io.rubduk.domain.services.{CommentService, PostService}
 import io.rubduk.domain.{CommentRepository, PostRepository, UserRepository}
-import io.rubduk.infrastructure.typeclasses.IdConverter.Id
+import io.rubduk.infrastructure.typeclasses.IdConverter._
+import io.rubduk.domain.filters._
 import io.rubduk.infrastructure.models._
 import zio.{Runtime => _}
 
@@ -26,12 +27,13 @@ class PostsApi(env: PostRepository with UserRepository with CommentRepository) e
       get {
         parameters(
           "offset".as(offset) ? Offset(0),
-          "limit".as(limit) ? Limit(10)
-        ) { (offset, limit) =>
+          "limit".as(limit) ? Limit(10),
+          "userId".as(IdParam[UserId]).optional
+        ) { (offset, limit, maybeUserId) =>
           pathEnd {
             complete {
               PostService
-                .getAllPaginated(offset, limit)
+                .getAllPaginated(offset, limit, postUserIdFilter(maybeUserId))
                 .map(_.map(_.toDTO))
                 .provide(env)
             }
