@@ -54,10 +54,11 @@ val root = (project in file("."))
       "io.circe"            %% "circe-generic"               % circeVersion,
       "io.circe"            %% "circe-parser"                % circeVersion,
       "io.circe"            %% "circe-generic-extras"        % "0.13.0",
-      "com.typesafe.akka"   %% "akka-http-testkit"           % akkaHttpVersion    % TestItTest,
-      "com.typesafe.akka"   %% "akka-stream-testkit"         % akkaVersion        % TestItTest,
-      "com.typesafe.akka"   %% "akka-actor-testkit-typed"    % akkaVersion        % TestItTest,
-      "dev.zio"             %% "zio-test-sbt"                % zioVersion         % TestItTest
+      "com.google.apis"      % "google-api-services-oauth2"  % "v2-rev157-1.25.0",
+      "com.typesafe.akka"   %% "akka-http-testkit"           % akkaHttpVersion % TestItTest,
+      "com.typesafe.akka"   %% "akka-stream-testkit"         % akkaVersion     % TestItTest,
+      "com.typesafe.akka"   %% "akka-actor-testkit-typed"    % akkaVersion     % TestItTest,
+      "dev.zio"             %% "zio-test-sbt"                % zioVersion      % TestItTest
     ),
     testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")),
     dockerReleaseSettings
