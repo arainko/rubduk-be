@@ -8,6 +8,7 @@ import io.rubduk.api._
 import io.rubduk.api.routes.Api
 import io.rubduk.config.AppConfig
 import io.rubduk.domain.repositories.{CommentRepository, PostRepository, UserRepository}
+import io.rubduk.domain.services.TokenValidation
 import slick.interop.zio.DatabaseProvider
 import slick.jdbc.PostgresProfile
 import zio._
@@ -38,6 +39,8 @@ object Boot extends App {
     // narrowing down to the required part of the config to ensure separation of concerns
     val apiConfigLayer = configLayer.map(c => Has(c.get.api))
 
+    val tokenValidationLayer = configLayer.map(c => Has(c.get.auth)) >>> TokenValidation.googleOAuth2
+
     val actorSystemLayer: TaskLayer[Has[ActorSystem]] = ZLayer.fromManaged {
       ZManaged.make(ZIO(ActorSystem("rubduk-system")))(s => ZIO.fromFuture(_ => s.terminate()).either)
     }
@@ -51,7 +54,7 @@ object Boot extends App {
 //      logFormat.format(correlationId, message)
 //    }
 
-    val apiLayer: TaskLayer[Api] = apiConfigLayer ++ repositoryLayer >>> Api.live
+    val apiLayer: TaskLayer[Api] = apiConfigLayer ++ tokenValidationLayer ++ repositoryLayer >>> Api.live
 
     val routesLayer: ZLayer[Api, Nothing, Has[Route]] =
       ZLayer.fromService(_.routes)

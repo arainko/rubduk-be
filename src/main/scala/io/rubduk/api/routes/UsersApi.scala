@@ -5,16 +5,16 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.MarshallingDirectives.{as => parse}
 import cats.syntax.functor._
 import io.rubduk.api.serializers.unmarshallers.{limit, offset}
-import io.rubduk.domain.UserRepository
-import io.rubduk.domain.services.UserService
+import io.rubduk.domain.{TokenValidation, UserRepository}
+import io.rubduk.domain.services.{IdToken, UserService}
 import io.rubduk.infrastructure.typeclasses.IdConverter.{Id, _}
 import io.rubduk.infrastructure.models.{Limit, Offset, UserDTO, UserId}
 
 object UsersApi {
-  def apply(env: UserRepository): Route = new UsersApi(env).routes
+  def apply(env: UserRepository with TokenValidation): Route = new UsersApi(env).routes
 }
 
-class UsersApi(env: UserRepository) extends Api.Service {
+class UsersApi(env: UserRepository with TokenValidation) extends Api.Service {
   import io.rubduk.api.serializers.codecs._
   import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
   import io.rubduk.domain.errors._
@@ -45,11 +45,21 @@ class UsersApi(env: UserRepository) extends Api.Service {
           }
         }
       } ~ post {
-        entity(parse[UserDTO]) { user =>
+//        entity(parse[UserDTO]) { user =>
+//          pathEnd {
+//            complete {
+//              UserService
+//                .insert(user)
+//                .provide(env)
+//            }
+//          }
+//        } ~
+        entity(parse[IdToken]) { token =>
           pathEnd {
             complete {
               UserService
-                .insert(user)
+                .loginOrRegister(token)
+                .map(_.toDTO)
                 .provide(env)
             }
           }
