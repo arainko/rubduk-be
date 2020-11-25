@@ -12,6 +12,11 @@ package object errors {
   implicit val applicationErrorResponse: ErrorResponse[ApplicationError] = {
     case ServerError(_) => HttpResponse(StatusCodes.InternalServerError, entity = "A server error has occurred.")
 
+    case ValidationError(message) => HttpResponse(StatusCodes.BadRequest, entity = message)
+
+    case AuthenticationError =>
+      HttpResponse(StatusCodes.Unauthorized, entity = "You are not authorized for this action.")
+
     case CommentNotFound =>
       HttpResponse(StatusCodes.NotFound, entity = "Requested comment was not found.")
 
@@ -25,7 +30,7 @@ package object errors {
       HttpResponse(StatusCodes.NotFound, entity = "Requested post was not found.")
 
     case PostNotByThisUser =>
-      HttpResponse(StatusCodes.Unauthorized, entity = "User is not authorized to alter this comment.")
+      HttpResponse(StatusCodes.Unauthorized, entity = "User is not authorized to alter this post.")
 
     case UserNotFound =>
       HttpResponse(StatusCodes.NotFound, entity = "Requested user was not found.")

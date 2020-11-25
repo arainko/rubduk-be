@@ -17,6 +17,7 @@ import zio.test.Assertion._
 import akka.http.scaladsl.model.HttpEntity
 import akka.http.scaladsl.model.ContentTypes
 import akka.util.ByteString
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import io.circe.syntax._
 import io.rubduk.infrastructure.models.UserId
 

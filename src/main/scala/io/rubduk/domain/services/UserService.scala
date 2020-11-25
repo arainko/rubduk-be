@@ -2,13 +2,13 @@ package io.rubduk.domain.services
 
 import java.time.OffsetDateTime
 
-import cats.syntax.option._
 import cats.syntax.functor._
-import io.rubduk.domain.UserRepository
+import cats.syntax.option._
 import io.rubduk.domain.errors.ApplicationError
 import io.rubduk.domain.errors.ApplicationError.ServerError
 import io.rubduk.domain.errors.UserError.{UserAlreadyExists, UserNotFound}
 import io.rubduk.domain.repositories.UserRepository
+import io.rubduk.domain.{TokenValidation, UserRepository}
 import io.rubduk.infrastructure.additional.Filter
 import io.rubduk.infrastructure.models.Page._
 import io.rubduk.infrastructure.models._
@@ -28,6 +28,20 @@ object UserService {
       .getByEmail(email)
       .someOrFail(UserNotFound)
       .map(_.toDomain)
+
+  def authenticate(idToken: IdToken): ZIO[TokenValidation with UserRepository, ApplicationError, User] =
+    for {
+      tokenUser <- TokenValidation.validateToken(idToken)
+      user      <- getByEmail(tokenUser.email)
+    } yield user
+
+  def loginOrRegister(idToken: IdToken): ZIO[TokenValidation with UserRepository, ApplicationError, User] =
+    for {
+      tokenUser <- TokenValidation.validateToken(idToken)
+      user <- getByEmail(tokenUser.email).orElse {
+        insert(tokenUser.toDTO).flatMap(getById)
+      }
+    } yield user
 
   def getAllPaginated(
     offset: Offset,

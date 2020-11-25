@@ -28,6 +28,7 @@ val root = (project in file("."))
     ),
     name := "rubduk",
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
+    addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.1" cross CrossVersion.full),
     libraryDependencies ++= Seq(
       "com.typesafe.akka"   %% "akka-http"                   % akkaHttpVersion,
       "de.heikoseeberger"   %% "akka-http-circe"             % "1.34.0",
@@ -54,10 +55,11 @@ val root = (project in file("."))
       "io.circe"            %% "circe-generic"               % circeVersion,
       "io.circe"            %% "circe-parser"                % circeVersion,
       "io.circe"            %% "circe-generic-extras"        % "0.13.0",
-      "com.typesafe.akka"   %% "akka-http-testkit"           % akkaHttpVersion    % TestItTest,
-      "com.typesafe.akka"   %% "akka-stream-testkit"         % akkaVersion        % TestItTest,
-      "com.typesafe.akka"   %% "akka-actor-testkit-typed"    % akkaVersion        % TestItTest,
-      "dev.zio"             %% "zio-test-sbt"                % zioVersion         % TestItTest
+      "com.google.apis"      % "google-api-services-oauth2"  % "v2-rev157-1.25.0",
+      "com.typesafe.akka"   %% "akka-http-testkit"           % akkaHttpVersion % TestItTest,
+      "com.typesafe.akka"   %% "akka-stream-testkit"         % akkaVersion     % TestItTest,
+      "com.typesafe.akka"   %% "akka-actor-testkit-typed"    % akkaVersion     % TestItTest,
+      "dev.zio"             %% "zio-test-sbt"                % zioVersion      % TestItTest
     ),
     testFrameworks := Seq(new TestFramework("zio.test.sbt.ZTestFramework")),
     dockerReleaseSettings
