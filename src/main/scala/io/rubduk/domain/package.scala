@@ -10,5 +10,5 @@ package object domain {
   type UserRepository    = Has[UserRepository.Service]
   type PostRepository    = Has[PostRepository.Service]
   type CommentRepository = Has[CommentRepository.Service]
-  type TokenValidation = Has[TokenValidation.Service]
+  type TokenValidation   = Has[TokenValidation.Service]
 }

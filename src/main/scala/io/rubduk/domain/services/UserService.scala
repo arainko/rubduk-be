@@ -29,10 +29,15 @@ object UserService {
       .someOrFail(UserNotFound)
       .map(_.toDomain)
 
+  def authenticate(idToken: IdToken): ZIO[TokenValidation with UserRepository, ApplicationError, User] =
+    for {
+      tokenUser <- TokenValidation.validateToken(idToken)
+      user      <- getByEmail(tokenUser.email)
+    } yield user
+
   def loginOrRegister(idToken: IdToken): ZIO[TokenValidation with UserRepository, ApplicationError, User] =
     for {
       tokenUser <- TokenValidation.validateToken(idToken)
-        .tapError(e => ZIO.succeed(println(e.message)))
       user <- getByEmail(tokenUser.email).orElse {
         insert(tokenUser.toDTO).flatMap(getById)
       }

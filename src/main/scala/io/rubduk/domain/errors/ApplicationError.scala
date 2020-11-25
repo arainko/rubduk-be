@@ -8,8 +8,6 @@ object ApplicationError {
   sealed trait DomainError extends ApplicationError
   trait EntityError        extends DomainError
 
-  final case class ValidationError(message: String) extends ApplicationError
-
   final case class ServerError(message: String) extends ApplicationError
 
   object ServerError extends (Throwable => ServerError) {

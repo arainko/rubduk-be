@@ -3,7 +3,7 @@ package io.rubduk.api.custom
 import akka.http.javadsl.server.Rejections
 import akka.http.scaladsl.server.Directive1
 import akka.http.scaladsl.server.Directives.{optionalHeaderValueByName, provide, reject}
-import io.rubduk.domain.services.IdToken
+import io.rubduk.infrastructure.models.IdToken
 
 object AuthDirectives {
 

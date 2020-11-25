@@ -2,9 +2,8 @@ package io.rubduk.api.serializers
 
 import io.circe.generic.semiauto._
 import io.circe.{Codec, Decoder, Encoder}
-import io.rubduk.domain.services.IdToken
+import io.rubduk.infrastructure.models._
 import io.rubduk.infrastructure.typeclasses.IdConverter
-import io.rubduk.infrastructure.models.{CommentDTO, Page, PostDTO, UserDTO}
 
 object codecs {
 

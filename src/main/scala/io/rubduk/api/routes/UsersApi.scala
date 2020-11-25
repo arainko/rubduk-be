@@ -4,19 +4,21 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.MarshallingDirectives.{as => parse}
 import cats.syntax.functor._
+import io.rubduk.api.custom.AuthDirectives._
 import io.rubduk.api.serializers.unmarshallers.{limit, offset}
+import io.rubduk.domain.errors.UserError.UserNotFound
+import io.rubduk.domain.services.UserService
 import io.rubduk.domain.{TokenValidation, UserRepository}
-import io.rubduk.domain.services.{IdToken, UserService}
+import io.rubduk.infrastructure.models._
 import io.rubduk.infrastructure.typeclasses.IdConverter.{Id, _}
-import io.rubduk.infrastructure.models.{Limit, Offset, UserDTO, UserId}
 
 object UsersApi {
   def apply(env: UserRepository with TokenValidation): Route = new UsersApi(env).routes
 }
 
 class UsersApi(env: UserRepository with TokenValidation) extends Api.Service {
-  import io.rubduk.api.serializers.codecs._
   import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+  import io.rubduk.api.serializers.codecs._
   import io.rubduk.domain.errors._
 
   override def routes: Route =
@@ -45,16 +47,7 @@ class UsersApi(env: UserRepository with TokenValidation) extends Api.Service {
           }
         }
       } ~ post {
-//        entity(parse[UserDTO]) { user =>
-//          pathEnd {
-//            complete {
-//              UserService
-//                .insert(user)
-//                .provide(env)
-//            }
-//          }
-//        } ~
-        entity(parse[IdToken]) { token =>
+        (path("login") & entity(parse[IdToken])) { token =>
           pathEnd {
             complete {
               UserService
@@ -65,11 +58,15 @@ class UsersApi(env: UserRepository with TokenValidation) extends Api.Service {
           }
         }
       } ~ put {
-        (path(Id[UserId]) & entity(parse[UserDTO])) { (userId, user) =>
+        (path(Id[UserId]) & entity(parse[UserDTO]) & idToken) { (userId, user, idToken) =>
           pathEnd {
             complete {
               UserService
-                .update(userId, user)
+                .authenticate(idToken)
+                .map(_.id)
+                .someOrFail(UserNotFound)
+                .filterOrFail(_ == userId)(AuthenticationError)
+                .zipRight(UserService.update(userId, user))
                 .provide(env)
             }
           }
