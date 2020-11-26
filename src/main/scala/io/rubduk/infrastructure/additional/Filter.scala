@@ -2,16 +2,13 @@ package io.rubduk.infrastructure.additional
 
 import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
 import slick.lifted.{Query, Rep}
+import cats.syntax.semigroupal._
+import cats._
+import io.rubduk.infrastructure.tables.{Posts, Users}
 
 trait Filter[T] { self =>
   def isApplicable: Boolean
   def apply(table: T): Rep[Boolean]
-
-  final def join[A](f2: Filter[A]): Filter[(T, A)] =
-    new Filter[(T, A)] {
-      override def isApplicable: Boolean              = self.isApplicable || f2.isApplicable
-      override def apply(table: (T, A)): Rep[Boolean] = self.apply(table._1) && f2.apply(table._2)
-    }
 
   final def && (f2: Filter[T]): Filter[T] =
     new Filter[T] {
@@ -25,14 +22,46 @@ trait Filter[T] { self =>
       override def apply(table: T): Rep[Boolean] = self.apply(table) || f2.apply(table)
     }
 
-  final def rearrange[A](f: A => T): Filter[A] =
-    new Filter[A] {
-      override def isApplicable: Boolean         = self.isApplicable
-      override def apply(table: A): Rep[Boolean] = self.apply(f(table))
+  final def sum[A](f2: Filter[A]): Filter[(T, A)] =
+    new Filter[(T, A)] {
+      override def isApplicable: Boolean              = self.isApplicable || f2.isApplicable
+      override def apply(table: (T, A)): Rep[Boolean] = self(table._1) || f2(table._2)
+    }
+
+  final def sum2[A, B](f1: Filter[A], f2: Filter[B]): Filter[(T, A, B)] =
+    new Filter[(T, A, B)] {
+      override def isApplicable: Boolean                 = self.isApplicable || f1.isApplicable || f2.isApplicable
+      override def apply(table: (T, A, B)): Rep[Boolean] = self(table._1) || f1(table._2) || f2(table._3)
+    }
+
+  final def sum3[A, B, C](f1: Filter[A], f2: Filter[B], f3: Filter[C]): Filter[(T, A, B, C)] =
+    new Filter[(T, A, B, C)] {
+      override def isApplicable: Boolean                 = self.isApplicable || f1.isApplicable || f2.isApplicable || f3.isApplicable
+      override def apply(table: (T, A, B, C)): Rep[Boolean] = self(table._1) || f1(table._2) || f2(table._3) || f3(table._4)
+    }
+
+  final def product[A](f2: Filter[A]): Filter[(T, A)] =
+    new Filter[(T, A)] {
+      override def isApplicable: Boolean              = self.isApplicable || f2.isApplicable
+      override def apply(table: (T, A)): Rep[Boolean] = self(table._1) && f2(table._2)
+    }
+
+  final def product2[A, B](f1: Filter[A], f2: Filter[B]): Filter[(T, A, B)] =
+    new Filter[(T, A, B)] {
+      override def isApplicable: Boolean                 = self.isApplicable || f1.isApplicable || f2.isApplicable
+      override def apply(table: (T, A, B)): Rep[Boolean] = self(table._1) && f1(table._2) && f2(table._3)
+    }
+
+  final def product3[A, B, C](f1: Filter[A], f2: Filter[B], f3: Filter[C]): Filter[(T, A, B, C)] =
+    new Filter[(T, A, B, C)] {
+      override def isApplicable: Boolean                 = self.isApplicable || f1.isApplicable || f2.isApplicable || f3.isApplicable
+      override def apply(table: (T, A, B, C)): Rep[Boolean] = self(table._1) && f1(table._2) && f2(table._3) && f3(table._4)
     }
 }
 
 object Filter {
+  Filter.sumEmpty[Users.Schema]
+    .sum(Filter.sumEmpty[Posts.Schema])
 
   private[this] case class OptionFilter[T, A](
     applier: Option[A],
@@ -43,9 +72,15 @@ object Filter {
     override def apply(table: T): Rep[Boolean] = predicate(table)
   }
 
-  def unit[T]: Filter[T] =
+  def sumEmpty[T]: Filter[T] =
     new Filter[T] {
       override def isApplicable: Boolean         = false
+      override def apply(table: T): Rep[Boolean] = false
+    }
+
+  def productEmpty[T]: Filter[T] =
+    new Filter[T] {
+      override def isApplicable: Boolean = false
       override def apply(table: T): Rep[Boolean] = true
     }
 
