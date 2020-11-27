@@ -2,8 +2,6 @@ package io.rubduk.infrastructure.additional
 
 import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
 import slick.lifted.{Query, Rep}
-import cats.syntax.semigroupal._
-import cats._
 import io.rubduk.infrastructure.tables.{Posts, Users}
 
 trait Filter[T] { self =>
