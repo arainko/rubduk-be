@@ -2,7 +2,6 @@ package io.rubduk.infrastructure.additional
 
 import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
 import slick.lifted.{Query, Rep}
-import io.rubduk.infrastructure.tables.{Posts, Users}
 
 trait Filter[T] { self =>
   def isApplicable: Boolean
@@ -58,8 +57,6 @@ trait Filter[T] { self =>
 }
 
 object Filter {
-  Filter.sumEmpty[Users.Schema]
-    .sum(Filter.sumEmpty[Posts.Schema])
 
   private[this] case class OptionFilter[T, A](
     applier: Option[A],
@@ -104,7 +101,7 @@ object Filter {
       applier.map(a => predicate(_: T, a)).getOrElse(_ => true)
     )
 
-  def sequence[T, A](appliers: Seq[A])(applicable: A => Boolean)(predicate: (T, A) => Rep[Boolean]): Filter[T] =
+  def sequential[T, A](appliers: Seq[A])(applicable: A => Boolean)(predicate: (T, A) => Rep[Boolean]): Filter[T] =
     new Filter[T] {
       override def isApplicable: Boolean = appliers.exists(applicable)
 

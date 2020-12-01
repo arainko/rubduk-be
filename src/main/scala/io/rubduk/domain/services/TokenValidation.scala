@@ -5,6 +5,7 @@ import java.util.Collections
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
+import io.rubduk.config.AppConfig.AuthConfig
 import io.rubduk.config._
 import io.rubduk.domain.TokenValidation
 import io.rubduk.domain.errors.ValidationError
