@@ -1,12 +1,14 @@
 package io.rubduk.api.routes
 
 import akka.http.interop.{HttpServer, ZIOSupport}
-import akka.http.scaladsl.server.Route
+import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.{Directives, Route}
 import io.rubduk.api.Api
-import io.rubduk.domain.{CommentRepository, PostRepository, TokenValidation, UserRepository}
+import io.rubduk.domain.services.Media
+import io.rubduk.domain.{CommentRepository, Media, PostRepository, TokenValidation, UserRepository}
+import io.rubduk.infrastructure.models.Base64Image
 import zio.config.ZConfig
 import zio.{URIO, ZIO, ZLayer}
-import akka.http.scaladsl.server.Directives._
 
 object Api {
 
@@ -16,10 +18,22 @@ object Api {
 
   val live: ZLayer[ZConfig[
     HttpServer.Config
-  ] with PostRepository with UserRepository with CommentRepository with TokenValidation, Nothing, Api] =
+  ] with PostRepository with UserRepository with CommentRepository with TokenValidation with Media, Nothing, Api] =
     ZLayer.fromFunction { env =>
       new Service {
-        def routes: Route = PostsApi(env) ~ UsersApi(env)
+        import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
+        import io.circe.generic.auto._
+
+        def routes: Route =
+          PostsApi(env) ~ UsersApi(env) ~ path("image") {
+            post {
+              entity(Directives.as[Base64Image]) { image =>
+                complete {
+                  Media.uploadImage(image).provide(env)
+                }
+              }
+            }
+          }
       }
     }
 

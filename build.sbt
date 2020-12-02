@@ -6,7 +6,7 @@ val slickVersion      = "3.3.3"
 val zioVersion        = "1.0.1"
 val zioLoggingVersion = "0.5.1"
 val zioConfigVersion  = "1.0.0-RC27"
-val circeVersion      = "0.12.3"
+val circeVersion      = "0.13.0"
 
 val TestItTest = "it, test"
 
@@ -28,7 +28,7 @@ val root = (project in file("."))
     ),
     name := "rubduk",
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
-    addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.1" cross CrossVersion.full),
+    addCompilerPlugin(("org.typelevel" %% "kind-projector" % "0.11.1").cross(CrossVersion.full)),
     libraryDependencies ++= Seq(
       "com.typesafe.akka"   %% "akka-http"                   % akkaHttpVersion,
       "de.heikoseeberger"   %% "akka-http-circe"             % "1.34.0",
@@ -54,6 +54,7 @@ val root = (project in file("."))
       "io.circe"            %% "circe-core"                  % circeVersion,
       "io.circe"            %% "circe-generic"               % circeVersion,
       "io.circe"            %% "circe-parser"                % circeVersion,
+      "io.circe"            %% "circe-optics"                % circeVersion,
       "io.circe"            %% "circe-generic-extras"        % "0.13.0",
       "com.google.apis"      % "google-api-services-oauth2"  % "v2-rev157-1.25.0",
       "com.typesafe.akka"   %% "akka-http-testkit"           % akkaHttpVersion % TestItTest,
