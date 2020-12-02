@@ -7,6 +7,7 @@ import io.rubduk.domain.{CommentRepository, PostRepository, TokenValidation, Use
 import zio.config.ZConfig
 import zio.{URIO, ZIO, ZLayer}
 import akka.http.scaladsl.server.Directives._
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
 object Api {
 
@@ -19,7 +20,9 @@ object Api {
   ] with PostRepository with UserRepository with CommentRepository with TokenValidation, Nothing, Api] =
     ZLayer.fromFunction { env =>
       new Service {
-        def routes: Route = PostsApi(env) ~ UsersApi(env)
+        def routes: Route = cors() {
+          PostsApi(env) ~ UsersApi(env)
+        }
       }
     }
 

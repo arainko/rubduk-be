@@ -28,10 +28,11 @@ val root = (project in file("."))
     ),
     name := "rubduk",
     addCompilerPlugin("com.olegpy" %% "better-monadic-for" % "0.3.1"),
-    addCompilerPlugin("org.typelevel" %% "kind-projector" % "0.11.1" cross CrossVersion.full),
+    addCompilerPlugin(("org.typelevel" %% "kind-projector" % "0.11.1").cross(CrossVersion.full)),
     libraryDependencies ++= Seq(
       "com.typesafe.akka"   %% "akka-http"                   % akkaHttpVersion,
       "de.heikoseeberger"   %% "akka-http-circe"             % "1.34.0",
+      "ch.megard"           %% "akka-http-cors"              % "1.1.0",
       "com.typesafe.akka"   %% "akka-actor-typed"            % akkaVersion,
       "com.typesafe.akka"   %% "akka-stream"                 % akkaVersion,
       "com.typesafe.slick"  %% "slick"                       % slickVersion,
