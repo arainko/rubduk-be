@@ -5,8 +5,8 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Directives, Route}
 import io.rubduk.api.Api
 import io.rubduk.domain.services.Media
-import io.rubduk.domain.{CommentRepository, Media, PostRepository, TokenValidation, UserRepository}
-import io.rubduk.infrastructure.models.Base64Image
+import io.rubduk.domain._
+import io.rubduk.infrastructure.models.media.Base64Image
 import zio.config.ZConfig
 import zio.{URIO, ZIO, ZLayer}
 
