@@ -11,6 +11,7 @@ import io.rubduk.domain.repositories.{CommentRepository, PostRepository, UserRep
 import io.rubduk.domain.services.{Media, TokenValidation}
 import slick.interop.zio.DatabaseProvider
 import slick.jdbc.PostgresProfile
+import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 import zio._
 import zio.config.typesafe.TypesafeConfig
 import zio.console._
@@ -43,7 +44,7 @@ object Boot extends App {
       ZManaged.make(ZIO(ActorSystem("rubduk-system")))(s => ZIO.fromFuture(_ => s.terminate()).either)
     }
 
-    val mediaLayer = configLayer.map(c => Has(c.get.imgur)) ++ actorSystemLayer >>> Media.imgur
+    val mediaLayer = configLayer.map(c => Has(c.get.imgur)) ++ AsyncHttpClientZioBackend.layer() >>> Media.imgur
 
     // Disabled for now
 //    val loggingLayer: ULayer[Logging] = Slf4jLogger.make { (context, message) =>

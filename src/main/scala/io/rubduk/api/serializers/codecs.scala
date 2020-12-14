@@ -1,18 +1,13 @@
 package io.rubduk.api.serializers
 
-import java.time.{LocalDateTime, ZoneOffset}
-
-import io.circe.generic.extras.Configuration
-import io.circe.generic.extras.semiauto._
+import io.circe.generic.extras.semiauto.deriveUnwrappedCodec
+import io.circe.generic.semiauto._
 import io.circe.{Codec, Decoder, Encoder}
 import io.rubduk.infrastructure.models._
-import io.rubduk.infrastructure.models.media._
+import io.rubduk.infrastructure.models.media.{ImageData, ImgurImageResponse, Link}
 import io.rubduk.infrastructure.typeclasses.IdConverter
 
-import scala.annotation.nowarn
-
 object codecs {
-  @nowarn implicit private val config: Configuration = Configuration.default
 
   implicit def idCodec[A: IdConverter]: Codec[A] =
     Codec.from(
@@ -20,18 +15,15 @@ object codecs {
       Encoder.encodeLong.contramap(IdConverter[A].toLong)
     )
 
-  implicit def pageCodec[A: Codec]: Codec[Page[A]] = deriveConfiguredCodec
+  implicit def pageCodec[A: Codec]: Codec[Page[A]] = deriveCodec
 
-  implicit val userCodec: Codec[UserDTO]            = deriveConfiguredCodec
-  implicit val postCodec: Codec[PostDTO]            = deriveConfiguredCodec
-  implicit val commentCodec: Codec[CommentDTO]      = deriveConfiguredCodec
-  implicit val tokenCodec: Codec[IdToken]           = deriveConfiguredCodec
-  implicit val linkCodec: Codec[Link]               = deriveUnwrappedCodec
-  implicit val deleteHashCodec: Codec[DeleteHash]   = deriveUnwrappedCodec
-  implicit val base64ImageCodec: Codec[Base64Image] = deriveConfiguredCodec
-  implicit val imageCodec: Codec[Image]             = deriveConfiguredCodec
-  implicit val videoCodec: Codec[Video]             = deriveConfiguredCodec
+  implicit val userCodec: Codec[UserDTO]       = deriveCodec
+  implicit val postCodec: Codec[PostDTO]       = deriveCodec
+  implicit val commentCodec: Codec[CommentDTO] = deriveCodec
+  implicit val tokenCodec: Codec[IdToken]      = deriveCodec
 
-  implicit val epochLocalDateTime: Decoder[LocalDateTime] = Decoder.decodeLong.map(LocalDateTime.ofEpochSecond(_, 0, ZoneOffset.UTC))
+  implicit val linkCodec: Codec[Link]                        = deriveUnwrappedCodec
+  implicit val imgurDataCodec: Codec[ImageData]              = deriveCodec
+  implicit val imgurResponseCodec: Codec[ImgurImageResponse] = deriveCodec
 
 }
