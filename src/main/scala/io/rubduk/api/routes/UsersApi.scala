@@ -7,7 +7,7 @@ import cats.syntax.functor._
 import io.rubduk.api.custom.AuthDirectives._
 import io.rubduk.api.serializers.unmarshallers.{limit, offset}
 import io.rubduk.domain.errors.UserError.UserNotFound
-import io.rubduk.domain.services.UserService
+import io.rubduk.domain.services.{Media, UserService}
 import io.rubduk.domain.{TokenValidation, UserRepository}
 import io.rubduk.infrastructure.models._
 import io.rubduk.infrastructure.typeclasses.IdConverter.{Id, _}
@@ -43,6 +43,15 @@ class UsersApi(env: UserRepository with TokenValidation) extends Api.Service {
                 .getById(userId)
                 .map(_.toDTO)
                 .provide(env)
+            }
+          } ~ path("media") {
+            pathEnd {
+              complete {
+                Media
+                  .getByUserIdPaginated(userId)
+                  .map(_.map(_.toDTO))
+                  .provide(env)
+              }
             }
           }
         }

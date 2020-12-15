@@ -13,22 +13,17 @@ object media {
   final case class ImageData(link: Link, name: String)
   final case class ImgurImageResponse(data: ImageData, success: Boolean, status: Int)
 
-  final case class MediumRecord(mediumId: Option[MediumId], userId: UserId, link: Link, dateAdded: OffsetDateTime) {
-
-    def unsafeToOutRecord: MediumOutRecord =
-      this
-        .into[MediumOutRecord]
-        .withFieldComputed(_.mediumId, _.mediumId.get)
-        .transform
-  }
-
   final case class MediumInRecord(userId: UserId, link: Link, dateAdded: OffsetDateTime) {
 
-    def toRecord: MediumRecord =
+    def toOutRecord(mediumId: MediumId): MediumRecord =
       this
         .into[MediumRecord]
-        .withFieldConst(_.mediumId, None)
+        .withFieldConst(_.mediumId, mediumId)
         .transform
   }
-  final case class MediumOutRecord(mediumId: MediumId, userId: UserId, link: Link, dateAdded: OffsetDateTime)
+  final case class MediumRecord(mediumId: MediumId, userId: UserId, link: Link, dateAdded: OffsetDateTime) {
+    def toDomain: Medium = this.transformInto[Medium]
+  }
+  final case class Medium(mediumId: MediumId, userId: UserId, link: Link, dateAdded: OffsetDateTime)
+  final case class MediumDTO(mediumId: MediumId, userId: UserId, link: Link, dateAdded: OffsetDateTime)
 }

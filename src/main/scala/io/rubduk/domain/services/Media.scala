@@ -1,43 +1,50 @@
 package io.rubduk.domain.services
 
-import java.util.UUID
+import io.rubduk.domain.errors.ApplicationError
+import io.rubduk.domain.errors.ApplicationError.ServerError
+import io.rubduk.domain.{MediaApi, MediaReadRepository, MediaRepository, TokenValidation, UserRepository}
+import io.rubduk.domain.errors.UserError.UserNotFound
+import io.rubduk.domain.repositories.{MediaReadRepository, MediaRepository}
+import io.rubduk.infrastructure.additional.Filter
+import io.rubduk.infrastructure.models.{IdToken, Limit, Offset, Page, RowCount, TokenUser, UserId}
+import io.rubduk.infrastructure.models.media.{Base64Image, Medium, MediumId, MediumInRecord, MediumRecord}
+import zio.{Has, ZIO, clock}
+import zio.clock._
+import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
+import io.rubduk.infrastructure.typeclasses.IdConverter._
 
-import io.rubduk.config.AppConfig.ImgurConfig
-import io.rubduk.domain.Media
-import io.rubduk.domain.errors.ThirdPartyError
-import io.rubduk.infrastructure.models.media.{Base64Image, ImageData, ImgurImageResponse}
-import sttp.client3._
-import sttp.client3.asynchttpclient.zio._
-import sttp.client3.circe._
-import zio.config.ZConfig
-import zio.macros.accessible
-import zio.{IO, URLayer, ZIO, ZLayer}
-
-@accessible
 object Media {
 
-  trait Service {
-    def uploadImage(image: Base64Image): IO[ThirdPartyError, ImageData]
+  def insert(
+    idToken: IdToken,
+    image: Base64Image
+  ): ZIO[
+    MediaRepository with Clock with MediaApi with UserRepository with TokenValidation,
+    ApplicationError,
+    MediumId
+  ] = {
+    for {
+      tokenUser     <- TokenValidation.validateToken(idToken)
+      userId        <- UserService.getByEmail(tokenUser.email).map(_.id).someOrFail(UserNotFound)
+      uploadedImage <- MediaApi.uploadImage(image)
+      currentTime   <- currentDateTime.orDie
+      imageToInsert = MediumInRecord(userId, uploadedImage.link, currentTime)
+      insertedId <- MediaRepository.insert(imageToInsert)
+    } yield insertedId
+
+    def getByUserIdPaginated(
+      userId: UserId,
+      offset: Offset,
+      limit: Limit
+    ): ZIO[MediaReadRepository, ServerError, Page[Medium]] =
+      MediaReadRepository.getPaginated(
+        offset,
+        limit,
+        Filter.applicable(userId)(_.userId === _) :: Nil
+      )
+
+    def delete(mediumId: MediumId): ZIO[MediaRepository, ServerError, RowCount] =
+      MediaRepository.delete(mediumId)
   }
-
-  val imgur: URLayer[ZConfig[ImgurConfig] with SttpClient, Media] =
-    ZLayer.fromServices[ImgurConfig, SttpClient.Service, Service] { (config, sttpClient) =>
-      new Service {
-        import io.rubduk.api.serializers.codecs._
-
-        private def uploadImageRequest(image: Base64Image) =
-          basicRequest
-            .header("Authorization", s"Client-ID ${config.clientId}")
-            .post(uri"${config.baseApiUrl}/image")
-            .body(("image", image.value), ("name", UUID.randomUUID.toString))
-            .response(asJson[ImgurImageResponse])
-
-        override def uploadImage(image: Base64Image): IO[ThirdPartyError, ImageData] =
-          for {
-            response <- sttpClient.send(uploadImageRequest(image)).mapError(ThirdPartyError)
-            body <- ZIO.fromEither(response.body).mapError(ThirdPartyError)
-          } yield body.data
-      }
-    }
 
 }

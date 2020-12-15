@@ -4,7 +4,7 @@ import akka.http.interop.{HttpServer, ZIOSupport}
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.{Directives, Route}
 import io.rubduk.api.Api
-import io.rubduk.domain.services.Media
+import io.rubduk.domain.services.MediaApi
 import io.rubduk.domain._
 import io.rubduk.infrastructure.models.media.Base64Image
 import zio.config.ZConfig
@@ -18,7 +18,7 @@ object Api {
 
   val live: ZLayer[ZConfig[
     HttpServer.Config
-  ] with PostRepository with UserRepository with CommentRepository with TokenValidation with Media, Nothing, Api] =
+  ] with PostRepository with UserRepository with CommentRepository with TokenValidation with MediaApi, Nothing, Api] =
     ZLayer.fromFunction { env =>
       new Service {
         import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
@@ -29,7 +29,7 @@ object Api {
             post {
               entity(Directives.as[Base64Image]) { image =>
                 complete {
-                  Media.uploadImage(image).provide(env)
+                  MediaApi.uploadImage(image).provide(env)
                 }
               }
             }

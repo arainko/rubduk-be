@@ -14,7 +14,7 @@ object Media {
     def link      = column[Link]("link")
     def userId    = column[UserId]("user_id")
     def dateAdded = column[OffsetDateTime]("date_added")
-    def *         = (id.?, userId, link, dateAdded).mapTo[MediumRecord]
+    def *         = (id, userId, link, dateAdded).mapTo[MediumRecord]
 
     def user = foreignKey("user_fk", userId, Users.table)(user => user.id, onDelete = ForeignKeyAction.Restrict)
   }
