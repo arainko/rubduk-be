@@ -24,6 +24,8 @@ object media {
   final case class MediumRecord(mediumId: MediumId, userId: UserId, link: Link, dateAdded: OffsetDateTime) {
     def toDomain: Medium = this.transformInto[Medium]
   }
-  final case class Medium(mediumId: MediumId, userId: UserId, link: Link, dateAdded: OffsetDateTime)
+  final case class Medium(mediumId: MediumId, userId: UserId, link: Link, dateAdded: OffsetDateTime) {
+    def toDTO: MediumDTO = this.transformInto[MediumDTO]
+  }
   final case class MediumDTO(mediumId: MediumId, userId: UserId, link: Link, dateAdded: OffsetDateTime)
 }

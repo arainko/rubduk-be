@@ -2,6 +2,7 @@ package io.rubduk.infrastructure.models
 
 import java.time.OffsetDateTime
 
+import cats.implicits.catsSyntaxOptionId
 import io.scalaland.chimney.dsl._
 
 final case class CommentId(value: Long) extends AnyVal
@@ -25,11 +26,14 @@ case class Comment(
   dateAdded: OffsetDateTime
 ) {
   def toDAO: CommentDAO = this.transformInto[CommentDAO]
-  def toDTO: CommentDTO = this.transformInto[CommentDTO]
+  def toDTO: CommentDTO = this.into[CommentDTO]
+    .withFieldComputed(_.userId, _.userId.some)
+    .transform
 }
 
 case class CommentDTO(
   id: Option[CommentId],
+  userId: Option[UserId],
   contents: String
 ) {
 

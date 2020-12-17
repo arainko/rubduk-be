@@ -40,12 +40,16 @@ final case class Post(
       .into[PostDTO]
       .withFieldComputed(_.dateAdded, _.dateAdded.some)
       .withFieldComputed(_.userId, _.user.id)
+      .withFieldComputed(_.username, _.user.name.some)
+      .withFieldComputed(_.userLastname, _.user.lastName)
       .transform
 }
 
 final case class PostDTO(
   id: Option[PostId],
   contents: String,
+  username: Option[String],
+  userLastname: Option[String],
   userId: Option[UserId],
   dateAdded: Option[OffsetDateTime]
 ) {

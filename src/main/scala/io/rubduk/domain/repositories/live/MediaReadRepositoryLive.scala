@@ -1,18 +1,15 @@
 package io.rubduk.domain.repositories.live
 
-import io.rubduk.domain.errors.ApplicationError
 import io.rubduk.domain.errors.ApplicationError._
 import io.rubduk.domain.repositories.MediaReadRepository
 import io.rubduk.infrastructure.additional.Filter
 import io.rubduk.infrastructure.additional.Filter.FilterOps
+import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
 import io.rubduk.infrastructure.models.media._
-import io.rubduk.infrastructure.models.{Limit, Offset, Page, RowCount, media}
+import io.rubduk.infrastructure.models.{Limit, Offset, Page, RowCount}
 import io.rubduk.infrastructure.tables.Media
 import slick.interop.zio._
 import slick.interop.zio.syntax._
-import Page._
-import cats.syntax.functor._
-import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
 import zio.{IO, ZIO}
 
 class MediaReadRepositoryLive(env: DatabaseProvider) extends MediaReadRepository.Service {

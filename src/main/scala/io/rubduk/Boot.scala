@@ -7,12 +7,19 @@ import com.typesafe.config.{Config, ConfigFactory}
 import io.rubduk.api._
 import io.rubduk.api.routes.Api
 import io.rubduk.config.AppConfig
-import io.rubduk.domain.repositories.{CommentRepository, PostRepository, UserRepository}
+import io.rubduk.domain.repositories.{
+  CommentRepository,
+  MediaReadRepository,
+  MediaRepository,
+  PostRepository,
+  UserRepository
+}
 import io.rubduk.domain.services.{MediaApi, TokenValidation}
 import slick.interop.zio.DatabaseProvider
 import slick.jdbc.PostgresProfile
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
 import zio._
+import zio.clock.Clock
 import zio.config.typesafe.TypesafeConfig
 import zio.console._
 
@@ -35,16 +42,24 @@ object Boot extends App {
     val repositoryLayer =
       (dbConfigLayer ++ dbBackendLayer) >>>
         DatabaseProvider.live >>>
-        (PostRepository.live ++ UserRepository.live ++ CommentRepository.live)
+        (
+          PostRepository.live ++
+            UserRepository.live ++
+            CommentRepository.live ++
+            MediaReadRepository.live ++
+            MediaRepository.live
+        )
 
     // narrowing down to the required part of the config to ensure separation of concerns
-    val apiConfigLayer = configLayer.map(c => Has(c.get.api))
+    val apiConfigLayer       = configLayer.map(c => Has(c.get.api))
     val tokenValidationLayer = configLayer.map(c => Has(c.get.auth)) >>> TokenValidation.googleOAuth2
-    val actorSystemLayer: TaskLayer[Has[ActorSystem]] = ZLayer.fromManaged {
+    val actorSystemLayer = ZLayer.fromManaged {
       ZManaged.make(ZIO(ActorSystem("rubduk-system")))(s => ZIO.fromFuture(_ => s.terminate()).either)
     }
 
-    val mediaLayer = configLayer.map(c => Has(c.get.imgur)) ++ AsyncHttpClientZioBackend.layer() >>> MediaApi.imgur
+    val mediaLayer = configLayer.map(c => Has(c.get.imgur)) ++
+      AsyncHttpClientZioBackend.layer() >>>
+      MediaApi.imgur
 
     // Disabled for now
 //    val loggingLayer: ULayer[Logging] = Slf4jLogger.make { (context, message) =>
@@ -55,7 +70,12 @@ object Boot extends App {
 //      logFormat.format(correlationId, message)
 //    }
 
-    val apiLayer: TaskLayer[Api] = apiConfigLayer ++ tokenValidationLayer ++ repositoryLayer ++ mediaLayer >>> Api.live
+    val apiLayer: TaskLayer[Api] =
+      apiConfigLayer ++
+        tokenValidationLayer ++
+        repositoryLayer ++
+        mediaLayer ++
+        Clock.live >>> Api.live
 
     val routesLayer: ZLayer[Api, Nothing, Has[Route]] =
       ZLayer.fromService(_.routes)
