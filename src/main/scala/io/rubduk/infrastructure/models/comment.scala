@@ -14,34 +14,53 @@ final case class CommentDAO(
   userId: UserId,
   dateAdded: OffsetDateTime
 ) {
-  def toDomain: Comment = this.transformInto[Comment]
-  def toDTO: CommentDTO = this.transformInto[CommentDTO]
+  def toDomain(user: User): Comment = this
+    .into[Comment]
+    .withFieldConst(_.user, user)
+    .transform
+
 }
 
 case class Comment(
   id: Option[CommentId],
   contents: String,
   postId: PostId,
-  userId: UserId,
+  user: User,
   dateAdded: OffsetDateTime
 ) {
-  def toDAO: CommentDAO = this.transformInto[CommentDAO]
-  def toDTO: CommentDTO = this.into[CommentDTO]
-    .withFieldComputed(_.userId, _.userId.some)
-    .transform
+  def toDAO(userId: UserId): CommentDAO =
+    this.into[CommentDAO]
+      .withFieldConst(_.userId, userId)
+      .transform
+
+  def toDTO: CommentDTO =
+    this
+      .into[CommentDTO]
+      .withFieldComputed(_.name, _.user.name.some)
+      .withFieldComputed(_.lastName, _.user.lastName)
+      .transform
 }
 
 case class CommentDTO(
   id: Option[CommentId],
-  userId: Option[UserId],
-  contents: String
+  contents: String,
+  name: Option[String],
+  lastName: Option[String],
+  dateAdded: Option[OffsetDateTime]
 ) {
 
-  def toDomain(postId: PostId, userId: UserId, dateAdded: OffsetDateTime): Comment =
+  def toDAO(postId: PostId, userId: UserId, dateAdded: OffsetDateTime): CommentDAO =
+    this.into[CommentDAO]
+      .withFieldConst(_.postId, postId)
+      .withFieldConst(_.userId, userId)
+      .withFieldConst(_.dateAdded, dateAdded)
+      .transform
+
+  def toDomain(postId: PostId, user: User, dateAdded: OffsetDateTime): Comment =
     this
       .into[Comment]
       .withFieldConst(_.postId, postId)
-      .withFieldConst(_.userId, userId)
+      .withFieldConst(_.user, user)
       .withFieldConst(_.dateAdded, dateAdded)
       .transform
 }

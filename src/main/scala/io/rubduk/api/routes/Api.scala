@@ -8,6 +8,8 @@ import io.rubduk.domain._
 import zio.clock.Clock
 import zio.config.ZConfig
 import zio.{URIO, ZIO, ZLayer}
+import akka.http.scaladsl.server.Directives._
+import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
 
 object Api {
 
@@ -28,7 +30,9 @@ object Api {
     Nothing, Api] =
     ZLayer.fromFunction { env =>
       new Service {
-        def routes: Route = PostsApi(env) ~ UsersApi(env)
+        def routes: Route = cors() {
+          PostsApi(env) ~ UsersApi(env)
+        }
       }
     }
 
