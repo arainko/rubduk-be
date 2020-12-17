@@ -38,6 +38,7 @@ case class Comment(
       .into[CommentDTO]
       .withFieldComputed(_.name, _.user.name.some)
       .withFieldComputed(_.lastName, _.user.lastName)
+      .withFieldComputed(_.userId, _.user.id)
       .transform
 }
 
@@ -46,6 +47,7 @@ case class CommentDTO(
   contents: String,
   name: Option[String],
   lastName: Option[String],
+  userId: Option[UserId],
   dateAdded: Option[OffsetDateTime]
 ) {
 

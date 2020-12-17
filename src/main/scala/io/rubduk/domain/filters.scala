@@ -10,5 +10,4 @@ object filters {
 
   def postUserIdFilter(userId: Option[UserId]): Filter[Posts.Schema] =
     Filter.optional(userId)(_.userId === _)
-
 }

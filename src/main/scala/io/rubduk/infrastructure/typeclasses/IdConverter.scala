@@ -3,6 +3,7 @@ package io.rubduk.infrastructure.typeclasses
 import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server._
 import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
+import io.rubduk.infrastructure.models.media.MediumId
 import io.rubduk.infrastructure.models.{CommentId, PostId, UserId}
 
 import scala.reflect.ClassTag
@@ -25,6 +26,7 @@ object IdConverter {
   implicit val userIdConverter: IdConverter[UserId]       = make(UserId, _.value)
   implicit val postIdConverter: IdConverter[PostId]       = make(PostId, _.value)
   implicit val commentIdConverter: IdConverter[CommentId] = make(CommentId, _.value)
+  implicit val mediumIdConverter: IdConverter[MediumId]   = make(MediumId, _.value)
 
   implicit def idMapper[A: IdConverter: ClassTag]: BaseColumnType[A] =
     MappedColumnType.base[A, Long](

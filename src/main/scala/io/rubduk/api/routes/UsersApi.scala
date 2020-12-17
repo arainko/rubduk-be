@@ -7,16 +7,23 @@ import cats.syntax.functor._
 import io.rubduk.api.custom.AuthDirectives._
 import io.rubduk.api.serializers.unmarshallers.{limit, offset}
 import io.rubduk.domain.errors.UserError.UserNotFound
-import io.rubduk.domain.services.UserService
-import io.rubduk.domain.{TokenValidation, UserRepository}
+import io.rubduk.domain.services.{MediaService, UserService}
+import io.rubduk.domain.{MediaApi, MediaReadRepository, MediaRepository, TokenValidation, UserRepository}
 import io.rubduk.infrastructure.models._
+import io.rubduk.infrastructure.models.media.Base64Image
 import io.rubduk.infrastructure.typeclasses.IdConverter.{Id, _}
+import zio.clock.Clock
 
 object UsersApi {
-  def apply(env: UserRepository with TokenValidation): Route = new UsersApi(env).routes
+
+  def apply(
+    env: UserRepository with TokenValidation with MediaReadRepository with MediaRepository with MediaApi with Clock
+  ): Route = new UsersApi(env).routes
 }
 
-class UsersApi(env: UserRepository with TokenValidation) extends Api.Service {
+class UsersApi(
+  env: UserRepository with TokenValidation with MediaReadRepository with MediaRepository with MediaApi with Clock
+) extends Api.Service {
   import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
   import io.rubduk.api.serializers.codecs._
   import io.rubduk.domain.errors._
@@ -45,6 +52,20 @@ class UsersApi(env: UserRepository with TokenValidation) extends Api.Service {
                 .provide(env)
             }
           }
+        } ~ path(Id[UserId] / "media") { userId =>
+          parameters(
+            "offset".as(offset) ? Offset(0),
+            "limit".as(limit) ? Limit(10)
+          ) { (offset, limit) =>
+            pathEnd {
+              complete {
+                MediaService
+                  .getByUserIdPaginated(userId, offset, limit)
+                  .map(_.map(_.toDTO))
+                  .provide(env)
+              }
+            }
+          }
         }
       } ~ post {
         (path("login") & entity(parse[IdToken])) { token =>
@@ -53,6 +74,14 @@ class UsersApi(env: UserRepository with TokenValidation) extends Api.Service {
               UserService
                 .loginOrRegister(token)
                 .map(_.toDTO)
+                .provide(env)
+            }
+          }
+        } ~ (path("media") & entity(parse[Base64Image]) & idToken) { (image, token) =>
+          pathEnd {
+            complete {
+              MediaService
+                .insert(token, image)
                 .provide(env)
             }
           }

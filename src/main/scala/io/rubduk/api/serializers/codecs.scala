@@ -1,8 +1,10 @@
 package io.rubduk.api.serializers
 
+import io.circe.generic.extras.semiauto.deriveUnwrappedCodec
 import io.circe.generic.semiauto._
 import io.circe.{Codec, Decoder, Encoder}
 import io.rubduk.infrastructure.models._
+import io.rubduk.infrastructure.models.media.{Base64Image, ImageData, ImgurImageResponse, Link, MediumDTO}
 import io.rubduk.infrastructure.typeclasses.IdConverter
 
 object codecs {
@@ -19,5 +21,11 @@ object codecs {
   implicit val postCodec: Codec[PostDTO]       = deriveCodec
   implicit val commentCodec: Codec[CommentDTO] = deriveCodec
   implicit val tokenCodec: Codec[IdToken]      = deriveCodec
+
+  implicit val linkCodec: Codec[Link]                        = deriveUnwrappedCodec
+  implicit val imgurDataCodec: Codec[ImageData]              = deriveCodec
+  implicit val imgurResponseCodec: Codec[ImgurImageResponse] = deriveCodec
+  implicit val base64ImageCodec: Codec[Base64Image]          = deriveCodec
+  implicit val mediumCodec: Codec[MediumDTO]          = deriveCodec
 
 }

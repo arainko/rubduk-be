@@ -1,8 +1,11 @@
 package io.rubduk.infrastructure.additional
 
 import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
+import shapeless.<:!<
+import shapeless.ops.tuple._
 import slick.lifted.{Query, Rep}
-import io.rubduk.infrastructure.tables.{Posts, Users}
+
+import scala.annotation.nowarn
 
 trait Filter[T] { self =>
   def isApplicable: Boolean
@@ -20,46 +23,36 @@ trait Filter[T] { self =>
       override def apply(table: T): Rep[Boolean] = self.apply(table) || f2.apply(table)
     }
 
-  final def sum[A](f2: Filter[A]): Filter[(T, A)] =
-    new Filter[(T, A)] {
-      override def isApplicable: Boolean              = self.isApplicable || f2.isApplicable
-      override def apply(table: (T, A)): Rep[Boolean] = self(table._1) || f2(table._2)
+  @nowarn final def tupled(implicit ev: T <:!< Product): Filter[Tuple1[T]] =
+    new Filter[Tuple1[T]] {
+      override def isApplicable: Boolean                 = self.isApplicable
+      override def apply(table: Tuple1[T]): Rep[Boolean] = self.apply(table._1)
     }
 
-  final def sum2[A, B](f1: Filter[A], f2: Filter[B]): Filter[(T, A, B)] =
-    new Filter[(T, A, B)] {
-      override def isApplicable: Boolean                 = self.isApplicable || f1.isApplicable || f2.isApplicable
-      override def apply(table: (T, A, B)): Rep[Boolean] = self(table._1) || f1(table._2) || f2(table._3)
+  @nowarn final def ** [A, C](f2: Filter[A])(implicit
+    prepend: Prepend.Aux[T, Tuple1[A], C],
+    init: Init.Aux[C, T],
+    last: Last.Aux[C, A],
+    ev: T <:< Product
+  ): Filter[C] =
+    new Filter[C] {
+      override def isApplicable: Boolean         = self.isApplicable || f2.isApplicable
+      override def apply(table: C): Rep[Boolean] = self(init(table)) && f2(last(table))
     }
 
-  final def sum3[A, B, C](f1: Filter[A], f2: Filter[B], f3: Filter[C]): Filter[(T, A, B, C)] =
-    new Filter[(T, A, B, C)] {
-      override def isApplicable: Boolean                 = self.isApplicable || f1.isApplicable || f2.isApplicable || f3.isApplicable
-      override def apply(table: (T, A, B, C)): Rep[Boolean] = self(table._1) || f1(table._2) || f2(table._3) || f3(table._4)
-    }
-
-  final def product[A](f2: Filter[A]): Filter[(T, A)] =
-    new Filter[(T, A)] {
-      override def isApplicable: Boolean              = self.isApplicable || f2.isApplicable
-      override def apply(table: (T, A)): Rep[Boolean] = self(table._1) && f2(table._2)
-    }
-
-  final def product2[A, B](f1: Filter[A], f2: Filter[B]): Filter[(T, A, B)] =
-    new Filter[(T, A, B)] {
-      override def isApplicable: Boolean                 = self.isApplicable || f1.isApplicable || f2.isApplicable
-      override def apply(table: (T, A, B)): Rep[Boolean] = self(table._1) && f1(table._2) && f2(table._3)
-    }
-
-  final def product3[A, B, C](f1: Filter[A], f2: Filter[B], f3: Filter[C]): Filter[(T, A, B, C)] =
-    new Filter[(T, A, B, C)] {
-      override def isApplicable: Boolean                 = self.isApplicable || f1.isApplicable || f2.isApplicable || f3.isApplicable
-      override def apply(table: (T, A, B, C)): Rep[Boolean] = self(table._1) && f1(table._2) && f2(table._3) && f3(table._4)
+  @nowarn final def ++ [A, C](f2: Filter[A])(implicit
+    prepend: Prepend.Aux[T, Tuple1[A], C],
+    init: Init.Aux[C, T],
+    last: Last.Aux[C, A],
+    ev: T <:< Product
+  ): Filter[C] =
+    new Filter[C] {
+      override def isApplicable: Boolean         = self.isApplicable || f2.isApplicable
+      override def apply(table: C): Rep[Boolean] = self(init(table)) || f2(last(table))
     }
 }
 
 object Filter {
-  Filter.sumEmpty[Users.Schema]
-    .sum(Filter.sumEmpty[Posts.Schema])
 
   private[this] case class OptionFilter[T, A](
     applier: Option[A],
@@ -78,7 +71,7 @@ object Filter {
 
   def productEmpty[T]: Filter[T] =
     new Filter[T] {
-      override def isApplicable: Boolean = false
+      override def isApplicable: Boolean         = false
       override def apply(table: T): Rep[Boolean] = true
     }
 
@@ -104,7 +97,7 @@ object Filter {
       applier.map(a => predicate(_: T, a)).getOrElse(_ => true)
     )
 
-  def sequence[T, A](appliers: Seq[A])(applicable: A => Boolean)(predicate: (T, A) => Rep[Boolean]): Filter[T] =
+  def sequential[T, A](appliers: Seq[A])(applicable: A => Boolean)(predicate: (T, A) => Rep[Boolean]): Filter[T] =
     new Filter[T] {
       override def isApplicable: Boolean = appliers.exists(applicable)
 
@@ -114,7 +107,7 @@ object Filter {
         }
     }
 
-  implicit class FilterOps[T <: Table[_], E](val query: Query[T, E, Seq]) extends AnyVal {
+  implicit class FilterOps[T, E](val query: Query[T, E, Seq]) extends AnyVal {
 
     def filteredBy(filters: Seq[Filter[T]]): Query[T, E, Seq] =
       filters.foldLeft(query) { (combinedQuery, filter) =>
