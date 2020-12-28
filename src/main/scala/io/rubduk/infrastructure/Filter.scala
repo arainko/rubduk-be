@@ -1,9 +1,9 @@
-package io.rubduk.infrastructure.additional
+package io.rubduk.infrastructure
 
-import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
 import shapeless.<:!<
 import shapeless.ops.tuple._
 import slick.lifted.{Query, Rep}
+import SlickPGProfile.api._
 
 import scala.annotation.nowarn
 

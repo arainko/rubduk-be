@@ -2,9 +2,9 @@ package io.rubduk.domain.repositories
 
 import io.rubduk.domain.UserRepository
 import io.rubduk.domain.errors.ApplicationError.ServerError
-import io.rubduk.domain.repositories.live.UserRepositoryLive
-import io.rubduk.infrastructure.additional.Filter
-import io.rubduk.infrastructure.models._
+import io.rubduk.infrastructure.repositories.UserRepositoryLive
+import io.rubduk.domain.models._
+import io.rubduk.infrastructure.Filter
 import io.rubduk.infrastructure.tables.Users
 import slick.interop.zio.DatabaseProvider
 import zio.macros.accessible

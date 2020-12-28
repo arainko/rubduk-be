@@ -6,7 +6,7 @@ import cats.implicits.catsSyntaxOptionId
 import com.typesafe.config.ConfigFactory
 import io.rubduk.config.AppConfig
 import io.rubduk.domain.repositories.{PostRepository, UserRepository}
-import io.rubduk.infrastructure.models.{Limit, Offset, UserDAO}
+import io.rubduk.domain.models.{Limit, Offset, UserDAO}
 import slick.interop.zio.DatabaseProvider
 import zio.{UIO, ZIO, ZLayer}
 import zio.config.typesafe.TypesafeConfig

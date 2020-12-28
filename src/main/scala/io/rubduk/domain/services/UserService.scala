@@ -9,9 +9,9 @@ import io.rubduk.domain.errors.ApplicationError.ServerError
 import io.rubduk.domain.errors.UserError.{UserAlreadyExists, UserNotFound}
 import io.rubduk.domain.repositories.UserRepository
 import io.rubduk.domain.{TokenValidation, UserRepository}
-import io.rubduk.infrastructure.additional.Filter
-import io.rubduk.infrastructure.models.Page._
-import io.rubduk.infrastructure.models._
+import io.rubduk.domain.models.Page._
+import io.rubduk.domain.models._
+import io.rubduk.infrastructure.Filter
 import io.rubduk.infrastructure.tables.Users
 import zio.ZIO
 

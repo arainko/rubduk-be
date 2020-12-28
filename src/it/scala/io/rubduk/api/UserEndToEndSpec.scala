@@ -10,8 +10,8 @@ import zio.test._
 import cats.implicits._
 import zio.test.environment.TestEnvironment
 import io.circe.parser.decode
-import io.rubduk.infrastructure.models.UserDTO
-import io.rubduk.infrastructure.models.Page
+import io.rubduk.domain.models.UserDTO
+import io.rubduk.domain.models.Page
 import akka.http.scaladsl.model.StatusCodes
 import zio.test.Assertion._
 import akka.http.scaladsl.model.HttpEntity
@@ -19,7 +19,7 @@ import akka.http.scaladsl.model.ContentTypes
 import akka.util.ByteString
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import io.circe.syntax._
-import io.rubduk.infrastructure.models.UserId
+import io.rubduk.domain.models.UserId
 
 object UserEndToEndSpec extends End2EndTestSuite {
   import io.rubduk.api.serializers.codecs._

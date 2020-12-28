@@ -5,7 +5,7 @@ import java.util.UUID
 import io.rubduk.config.AppConfig.ImgurConfig
 import io.rubduk.domain.MediaApi
 import io.rubduk.domain.errors.ThirdPartyError
-import io.rubduk.infrastructure.models.media.{Base64Image, ImageData, ImgurImageResponse}
+import io.rubduk.domain.models.media.{Base64Image, ImageData, ImgurImageResponse}
 import sttp.client3._
 import sttp.client3.asynchttpclient.zio._
 import sttp.client3.circe._

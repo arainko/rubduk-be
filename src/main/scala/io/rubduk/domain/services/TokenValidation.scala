@@ -8,7 +8,7 @@ import com.google.api.client.json.jackson2.JacksonFactory
 import io.rubduk.config.AppConfig.AuthConfig
 import io.rubduk.domain.TokenValidation
 import io.rubduk.domain.errors.ValidationError
-import io.rubduk.infrastructure.models.{IdToken, TokenUser}
+import io.rubduk.domain.models.{IdToken, TokenUser}
 import zio.{Has, URLayer, ZIO, ZLayer}
 
 import scala.util.Try

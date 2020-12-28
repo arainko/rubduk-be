@@ -10,8 +10,8 @@ import io.rubduk.domain.errors.UserError.UserNotFound
 import io.rubduk.domain.filters._
 import io.rubduk.domain.services.{CommentService, PostService, UserService}
 import io.rubduk.domain.{CommentRepository, PostRepository, TokenValidation, UserRepository}
-import io.rubduk.infrastructure.models._
-import io.rubduk.infrastructure.typeclasses.IdConverter._
+import io.rubduk.domain.models._
+import io.rubduk.domain.typeclasses.IdConverter._
 import zio.{Runtime => _}
 
 object PostsApi {

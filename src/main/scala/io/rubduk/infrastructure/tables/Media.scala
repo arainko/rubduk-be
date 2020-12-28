@@ -2,10 +2,10 @@ package io.rubduk.infrastructure.tables
 
 import java.time.OffsetDateTime
 
-import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
-import io.rubduk.infrastructure.models.UserId
-import io.rubduk.infrastructure.models.media._
-import io.rubduk.infrastructure.typeclasses.IdConverter._
+import io.rubduk.infrastructure.SlickPGProfile.api._
+import io.rubduk.domain.models.UserId
+import io.rubduk.domain.models.media._
+import io.rubduk.domain.typeclasses.IdConverter._
 
 object Media {
 

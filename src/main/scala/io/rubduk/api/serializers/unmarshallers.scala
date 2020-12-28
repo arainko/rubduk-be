@@ -1,8 +1,8 @@
 package io.rubduk.api.serializers
 
 import akka.http.scaladsl.unmarshalling.Unmarshaller
-import io.rubduk.infrastructure.models.{Limit, Offset}
-import io.rubduk.infrastructure.typeclasses.IdConverter
+import io.rubduk.domain.models.{Limit, Offset}
+import io.rubduk.domain.typeclasses.IdConverter
 
 object unmarshallers {
 

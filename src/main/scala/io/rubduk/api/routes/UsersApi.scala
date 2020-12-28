@@ -9,9 +9,9 @@ import io.rubduk.api.serializers.unmarshallers.{limit, offset}
 import io.rubduk.domain.errors.UserError.UserNotFound
 import io.rubduk.domain.services.{MediaService, UserService}
 import io.rubduk.domain.{MediaApi, MediaReadRepository, MediaRepository, TokenValidation, UserRepository}
-import io.rubduk.infrastructure.models._
-import io.rubduk.infrastructure.models.media.Base64Image
-import io.rubduk.infrastructure.typeclasses.IdConverter.{Id, _}
+import io.rubduk.domain.models._
+import io.rubduk.domain.models.media.Base64Image
+import io.rubduk.domain.typeclasses.IdConverter.{Id, _}
 import zio.clock.Clock
 
 object UsersApi {

@@ -7,8 +7,8 @@ import io.rubduk.domain.errors.ApplicationError
 import io.rubduk.domain.errors.PostError.{PostNotByThisUser, PostNotFound}
 import io.rubduk.domain.repositories.PostRepository
 import io.rubduk.domain.{PostRepository, UserRepository}
-import io.rubduk.infrastructure.additional.Filter
-import io.rubduk.infrastructure.models._
+import io.rubduk.domain.models._
+import io.rubduk.infrastructure.Filter
 import io.rubduk.infrastructure.tables.Posts
 import zio.ZIO
 

@@ -2,9 +2,9 @@ package io.rubduk.infrastructure.tables
 
 import java.time.OffsetDateTime
 
-import io.rubduk.infrastructure.typeclasses.IdConverter._
-import io.rubduk.infrastructure.models.{PostDAO, PostId, UserId}
-import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
+import io.rubduk.domain.typeclasses.IdConverter._
+import io.rubduk.domain.models.{PostDAO, PostId, UserId}
+import io.rubduk.infrastructure.SlickPGProfile.api._
 
 object Posts {
 

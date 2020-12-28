@@ -2,10 +2,10 @@ package io.rubduk.domain.repositories
 
 import io.rubduk.domain.MediaReadRepository
 import io.rubduk.domain.errors.ApplicationError.ServerError
-import io.rubduk.domain.repositories.live.MediaReadRepositoryLive
-import io.rubduk.infrastructure.additional.Filter
-import io.rubduk.infrastructure.models.media.Medium
-import io.rubduk.infrastructure.models.{Limit, Offset, Page, RowCount}
+import io.rubduk.infrastructure.repositories.MediaReadRepositoryLive
+import io.rubduk.domain.models.media.Medium
+import io.rubduk.domain.models.{Limit, Offset, Page, RowCount}
+import io.rubduk.infrastructure.Filter
 import io.rubduk.infrastructure.tables.Media
 import slick.interop.zio.DatabaseProvider
 import zio.macros.accessible

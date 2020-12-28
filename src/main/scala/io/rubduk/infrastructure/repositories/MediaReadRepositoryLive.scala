@@ -1,12 +1,13 @@
-package io.rubduk.domain.repositories.live
+package io.rubduk.infrastructure.repositories
 
 import io.rubduk.domain.errors.ApplicationError._
+import io.rubduk.domain.models.media._
+import io.rubduk.domain.models.{Limit, Offset, Page}
 import io.rubduk.domain.repositories.MediaReadRepository
-import io.rubduk.infrastructure.additional.Filter
-import io.rubduk.infrastructure.additional.Filter.FilterOps
-import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
-import io.rubduk.infrastructure.models.media._
-import io.rubduk.infrastructure.models.{Limit, Offset, Page, RowCount}
+import io.rubduk.infrastructure.Filter
+import io.rubduk.infrastructure.Filter.FilterOps
+import io.rubduk.infrastructure.SlickPGProfile.api._
+import io.rubduk.infrastructure.models.RowCount
 import io.rubduk.infrastructure.tables.Media
 import slick.interop.zio._
 import slick.interop.zio.syntax._

@@ -2,9 +2,9 @@ package io.rubduk.domain.repositories
 
 import io.rubduk.domain.MediaRepository
 import io.rubduk.domain.errors.ApplicationError.ServerError
-import io.rubduk.domain.repositories.live.MediaRepositoryLive
-import io.rubduk.infrastructure.models.RowCount
-import io.rubduk.infrastructure.models.media.{MediumId, MediumInRecord, MediumRecord}
+import io.rubduk.infrastructure.repositories.MediaRepositoryLive
+import io.rubduk.domain.models.RowCount
+import io.rubduk.domain.models.media.{MediumId, MediumInRecord, MediumRecord}
 import slick.interop.zio.DatabaseProvider
 import zio.{IO, URLayer, ZLayer}
 import zio.macros.accessible

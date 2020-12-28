@@ -1,10 +1,10 @@
-package io.rubduk.infrastructure.additional
+package io.rubduk.infrastructure
 
 import com.github.tminglei.slickpg._
 import slick.basic.Capability
 import slick.jdbc.JdbcCapabilities.insertOrUpdate
 
-trait ImprovedPostgresProfile
+trait SlickPGProfile
     extends ExPostgresProfile
     with PgArraySupport
     with PgDate2Support
@@ -19,9 +19,9 @@ trait ImprovedPostgresProfile
   override protected def computeCapabilities: Set[Capability] =
     super.computeCapabilities + insertOrUpdate
 
-  override val api = MyAPI
+  override val api = SlickPGAPI
 
-  object MyAPI
+  object SlickPGAPI
       extends API
       with ArrayImplicits
       with DateTimeImplicits
@@ -38,4 +38,4 @@ trait ImprovedPostgresProfile
 
 }
 
-object ImprovedPostgresProfile extends ImprovedPostgresProfile
+object SlickPGProfile extends SlickPGProfile

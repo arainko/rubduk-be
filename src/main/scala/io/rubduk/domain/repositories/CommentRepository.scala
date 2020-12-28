@@ -2,9 +2,10 @@ package io.rubduk.domain.repositories
 
 import io.rubduk.domain.CommentRepository
 import io.rubduk.domain.errors.ApplicationError.ServerError
-import io.rubduk.domain.repositories.live.CommentRepositoryLive
-import io.rubduk.infrastructure.additional.Filter
-import io.rubduk.infrastructure.models._
+import io.rubduk.infrastructure.repositories.CommentRepositoryLive
+import io.rubduk.domain.models._
+import io.rubduk.infrastructure.Filter
+import io.rubduk.infrastructure.models.RowCount
 import io.rubduk.infrastructure.tables.Comments
 import slick.interop.zio.DatabaseProvider
 import zio.macros.accessible

@@ -3,9 +3,9 @@ package io.rubduk.api.serializers
 import io.circe.generic.extras.semiauto.deriveUnwrappedCodec
 import io.circe.generic.semiauto._
 import io.circe.{Codec, Decoder, Encoder}
-import io.rubduk.infrastructure.models._
-import io.rubduk.infrastructure.models.media.{Base64Image, ImageData, ImgurImageResponse, Link, MediumDTO}
-import io.rubduk.infrastructure.typeclasses.IdConverter
+import io.rubduk.domain.models._
+import io.rubduk.domain.models.media.{Base64Image, ImageData, ImgurImageResponse, Link, MediumDTO}
+import io.rubduk.domain.typeclasses.IdConverter
 
 object codecs {
 

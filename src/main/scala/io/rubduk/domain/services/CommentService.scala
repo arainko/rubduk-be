@@ -9,8 +9,8 @@ import io.rubduk.domain.errors.PostError.PostNotFound
 import io.rubduk.domain.errors.UserError.UserNotFound
 import io.rubduk.domain.repositories.{CommentRepository, PostRepository}
 import io.rubduk.domain.{CommentRepository, PostRepository, UserRepository}
-import io.rubduk.infrastructure.additional.Filter
-import io.rubduk.infrastructure.models._
+import io.rubduk.domain.models._
+import io.rubduk.infrastructure.Filter
 import io.rubduk.infrastructure.tables.Comments
 import zio.ZIO
 

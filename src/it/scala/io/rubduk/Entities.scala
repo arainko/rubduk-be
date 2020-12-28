@@ -3,7 +3,7 @@ package io.rubduk
 import java.time.OffsetDateTime
 import java.util.UUID
 
-import io.rubduk.infrastructure.models.{Comment, Post, PostId, User, UserId}
+import io.rubduk.domain.models.{Comment, Post, PostId, User, UserId}
 
 object Entities {
   private def uuid: String = UUID.randomUUID.toString

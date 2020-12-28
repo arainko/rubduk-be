@@ -1,10 +1,10 @@
 package io.rubduk.domain
 
-import io.rubduk.infrastructure.additional.Filter
-import io.rubduk.infrastructure.additional.ImprovedPostgresProfile.api._
-import io.rubduk.infrastructure.models.UserId
+import io.rubduk.infrastructure.SlickPGProfile.api._
+import io.rubduk.domain.models.UserId
 import io.rubduk.infrastructure.tables.Posts
-import io.rubduk.infrastructure.typeclasses.IdConverter._
+import io.rubduk.domain.typeclasses.IdConverter._
+import io.rubduk.infrastructure.Filter
 
 object filters {
 
