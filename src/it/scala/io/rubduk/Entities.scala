@@ -3,7 +3,9 @@ package io.rubduk
 import java.time.OffsetDateTime
 import java.util.UUID
 
-import io.rubduk.domain.models.{Comment, Post, PostId, User, UserId}
+import io.rubduk.domain.models.user._
+import io.rubduk.domain.models.post._
+import io.rubduk.domain.models.comment._
 
 object Entities {
   private def uuid: String = UUID.randomUUID.toString
@@ -14,5 +16,5 @@ object Entities {
 
   def post(user: User): Post = Post(None, uuid, user, OffsetDateTime.now)
 
-  def comment(postId: PostId, userId: UserId): Comment = Comment(None, uuid, postId, userId, OffsetDateTime.now)
+  def comment(postId: PostId, user: User): Comment = Comment(None, uuid, postId, user, OffsetDateTime.now)
 }

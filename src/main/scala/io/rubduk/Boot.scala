@@ -9,6 +9,7 @@ import io.rubduk.api.routes.Api
 import io.rubduk.application.{MediaApi, TokenValidation}
 import io.rubduk.config.AppConfig
 import io.rubduk.domain.repositories._
+import io.rubduk.infrastructure.flyway.FlywayProvider
 import slick.interop.zio.DatabaseProvider
 import slick.jdbc.PostgresProfile
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend
@@ -16,6 +17,7 @@ import zio._
 import zio.clock.Clock
 import zio.config.typesafe.TypesafeConfig
 import zio.console._
+import zio.duration.durationInt
 
 object Boot extends App {
 
@@ -24,10 +26,21 @@ object Boot extends App {
       .flatMap(rawConfig => program.provideCustomLayer(prepareEnvironment(rawConfig)))
       .exitCode
 
-  private val program: ZIO[HttpServer with Console, Throwable, Unit] =
-    HttpServer.start.tapM(_ => putStrLn(s"Server online.")).useForever
+  private val program: RIO[HttpServer with FlywayProvider with ZEnv, Unit] = {
+    val startHttpServer =
+      HttpServer.start.tapM(_ => putStrLn("Server online."))
 
-  private def prepareEnvironment(rawConfig: Config): TaskLayer[HttpServer] = {
+    val migrateDbSchema =
+      FlywayProvider.flyway
+        .flatMap(_.migrate)
+        .retry(Schedule.exponential(200.millis))
+        .flatMap(res => putStrLn(s"Flyway migration completed with: $res"))
+        .toManaged_
+
+    (startHttpServer *> migrateDbSchema).useForever
+  }
+
+  private def prepareEnvironment(rawConfig: Config): TaskLayer[HttpServer with FlywayProvider] = {
     val configLayer = TypesafeConfig.fromTypesafeConfig(rawConfig, AppConfig.descriptor)
 
     // using raw config since it's recommended and the simplest to work with slick
@@ -55,6 +68,9 @@ object Boot extends App {
       AsyncHttpClientZioBackend.layer() >>>
       MediaApi.imgur
 
+    val flywayLayer: TaskLayer[FlywayProvider] =
+      dbConfigLayer >>> FlywayProvider.live
+
     // Disabled for now
 //    val loggingLayer: ULayer[Logging] = Slf4jLogger.make { (context, message) =>
 //      val logFormat = "[correlation-id = %s] %s"
@@ -74,6 +90,8 @@ object Boot extends App {
     val routesLayer: ZLayer[Api, Nothing, Has[Route]] =
       ZLayer.fromService(_.routes)
 
-    (actorSystemLayer ++ apiConfigLayer ++ (apiLayer >>> routesLayer)) >>> HttpServer.live
+    val serverLayer = (actorSystemLayer ++ apiConfigLayer ++ (apiLayer >>> routesLayer)) >>> HttpServer.live
+
+    serverLayer ++ flywayLayer
   }
 }
