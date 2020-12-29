@@ -1,12 +1,13 @@
 package io.rubduk.infrastructure.repositories
 
 import io.rubduk.domain.errors.ApplicationError.ServerError
+import io.rubduk.domain.models.aliases._
+import io.rubduk.domain.models.common._
+import io.rubduk.domain.models.post._
 import io.rubduk.domain.repositories.PostRepository
-import io.rubduk.infrastructure.Filter.FilterOps
 import io.rubduk.infrastructure.SlickPGProfile.api._
-import io.rubduk.domain.typeclasses.IdConverter._
-import io.rubduk.domain.models._
-import io.rubduk.infrastructure.Filter
+import io.rubduk.infrastructure.filters.syntax._
+import io.rubduk.infrastructure.mappers._
 import io.rubduk.infrastructure.tables.Posts
 import slick.interop.zio.DatabaseProvider
 import slick.interop.zio.syntax._
@@ -14,7 +15,7 @@ import zio.{IO, ZIO}
 
 class PostRepositoryLive(env: DatabaseProvider) extends PostRepository.Service {
 
-  override def getById(postId: PostId): IO[ServerError, Option[PostDAO]] =
+  override def getById(postId: PostId): IO[ServerError, Option[PostRecord]] =
     ZIO
       .fromDBIO {
         Posts.table
@@ -28,17 +29,17 @@ class PostRepositoryLive(env: DatabaseProvider) extends PostRepository.Service {
   override def getAllPaginated(
     offset: Offset,
     limit: Limit,
-    filters: Seq[Filter[Posts.Schema]]
-  ): IO[ServerError, Page[PostDAO]] =
+    filters: Seq[PostFilter]
+  ): IO[ServerError, Page[PostRecord]] =
     getAll(offset, limit, filters).zipPar(countFiltered(filters)).map {
       case (posts, postCount) => Page(posts, postCount)
     }
 
-  override def getAll(offset: Offset, limit: Limit, filters: Seq[Filter[Posts.Schema]]): IO[ServerError, Seq[PostDAO]] =
+  override def getAll(offset: Offset, limit: Limit, filters: Seq[PostFilter]): IO[ServerError, Seq[PostRecord]] =
     ZIO
       .fromDBIO {
         Posts.table
-          .filteredBy(filters)
+          .filteredBy(filters.map(_.interpret))
           .drop(offset.value)
           .take(limit.value)
           .result
@@ -46,15 +47,15 @@ class PostRepositoryLive(env: DatabaseProvider) extends PostRepository.Service {
       .mapError(ServerError)
       .provide(env)
 
-  override def countFiltered(filters: Seq[Filter[Posts.Schema]]): IO[ServerError, RowCount] =
+  override def countFiltered(filters: Seq[PostFilter]): IO[ServerError, RowCount] =
     ZIO
       .fromDBIO {
-        Posts.table.filteredBy(filters).length.result
+        Posts.table.filteredBy(filters.map(_.interpret)).length.result
       }
       .mapError(ServerError)
       .provide(env)
 
-  override def insert(post: PostDAO): IO[ServerError, PostId] =
+  override def insert(post: PostRecord): IO[ServerError, PostId] =
     ZIO
       .fromDBIO {
         Posts.table.returning(Posts.table.map(_.id)) += post

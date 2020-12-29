@@ -16,22 +16,15 @@ object Api {
     def routes: Route
   }
 
-  val live: ZLayer[
-    ZConfig[HttpServer.Config]
-      with PostRepository
-      with UserRepository
-      with CommentRepository
-      with TokenValidation
-      with MediaApi
-      with MediaReadRepository
-      with MediaRepository
-      with Clock,
-    Nothing, Api] =
+  val live: ZLayer[ZConfig[
+    HttpServer.Config
+  ] with PostRepository with UserRepository with CommentRepository with TokenValidation with MediaApi with MediaReadRepository with MediaRepository with Clock, Nothing, Api] =
     ZLayer.fromFunction { env =>
       new Service {
-        def routes: Route = cors() {
-          PostsApi(env) ~ UsersApi(env)
-        }
+        def routes: Route =
+          cors() {
+            PostsApi(env) ~ UsersApi(env)
+          }
       }
     }
 

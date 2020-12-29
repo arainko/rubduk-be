@@ -1,13 +1,12 @@
 package io.rubduk.infrastructure.repositories
 
 import io.rubduk.domain.errors.ApplicationError._
+import io.rubduk.domain.models.aliases._
+import io.rubduk.domain.models.common._
 import io.rubduk.domain.models.media._
-import io.rubduk.domain.models.{Limit, Offset, Page}
 import io.rubduk.domain.repositories.MediaReadRepository
-import io.rubduk.infrastructure.Filter
-import io.rubduk.infrastructure.Filter.FilterOps
+import io.rubduk.infrastructure.filters.syntax._
 import io.rubduk.infrastructure.SlickPGProfile.api._
-import io.rubduk.infrastructure.models.RowCount
 import io.rubduk.infrastructure.tables.Media
 import slick.interop.zio._
 import slick.interop.zio.syntax._
@@ -18,12 +17,12 @@ class MediaReadRepositoryLive(env: DatabaseProvider) extends MediaReadRepository
   override def getAll(
     offset: Offset,
     limit: Limit,
-    filters: Seq[Filter[Media.Schema]]
+    filters: Seq[MediaFilter]
   ): IO[ServerError, Seq[Medium]] =
     ZIO
       .fromDBIO {
         Media.table
-          .filteredBy(filters)
+          .filteredBy(filters.map(_.interpret))
           .drop(offset.value)
           .take(limit.value)
           .result
@@ -34,16 +33,17 @@ class MediaReadRepositoryLive(env: DatabaseProvider) extends MediaReadRepository
   override def getPaginated(
     offset: Offset,
     limit: Limit,
-    filters: Seq[Filter[Media.Schema]]
+    filters: Seq[MediaFilter]
   ): IO[ServerError, Page[Medium]] =
     getAll(offset, limit, filters)
       .zipPar(count(filters))
       .map((Page.apply[Medium] _).tupled)
 
-  override def count(filters: Seq[Filter[Media.Schema]]): IO[ServerError, RowCount] =
-    ZIO.fromDBIO {
-      Media.table.filteredBy(filters).length.result
-    }
+  override def count(filters: Seq[MediaFilter]): IO[ServerError, RowCount] =
+    ZIO
+      .fromDBIO {
+        Media.table.filteredBy(filters.map(_.interpret)).length.result
+      }
       .mapError(ServerError)
       .provide(env)
 }

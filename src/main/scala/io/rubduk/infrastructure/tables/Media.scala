@@ -1,11 +1,11 @@
 package io.rubduk.infrastructure.tables
 
-import java.time.OffsetDateTime
-
-import io.rubduk.infrastructure.SlickPGProfile.api._
-import io.rubduk.domain.models.UserId
 import io.rubduk.domain.models.media._
-import io.rubduk.domain.typeclasses.IdConverter._
+import io.rubduk.domain.models.user._
+import io.rubduk.infrastructure.mappers._
+import io.rubduk.infrastructure.SlickPGProfile.api._
+
+import java.time.OffsetDateTime
 
 object Media {
 

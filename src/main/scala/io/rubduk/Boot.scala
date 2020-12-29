@@ -6,15 +6,9 @@ import akka.http.scaladsl.server.Route
 import com.typesafe.config.{Config, ConfigFactory}
 import io.rubduk.api._
 import io.rubduk.api.routes.Api
+import io.rubduk.application.{MediaApi, TokenValidation}
 import io.rubduk.config.AppConfig
-import io.rubduk.domain.repositories.{
-  CommentRepository,
-  MediaReadRepository,
-  MediaRepository,
-  PostRepository,
-  UserRepository
-}
-import io.rubduk.domain.services.{MediaApi, TokenValidation}
+import io.rubduk.domain.repositories._
 import slick.interop.zio.DatabaseProvider
 import slick.jdbc.PostgresProfile
 import sttp.client3.asynchttpclient.zio.AsyncHttpClientZioBackend

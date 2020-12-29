@@ -4,14 +4,15 @@ import akka.http.scaladsl.server.Directives._
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.MarshallingDirectives.{as => parse}
 import cats.syntax.functor._
-import io.rubduk.api.custom.AuthDirectives._
 import io.rubduk.api.serializers.unmarshallers.{limit, offset}
 import io.rubduk.domain.errors.UserError.UserNotFound
-import io.rubduk.domain.services.{MediaService, UserService}
-import io.rubduk.domain.{MediaApi, MediaReadRepository, MediaRepository, TokenValidation, UserRepository}
-import io.rubduk.domain.models._
+import io.rubduk.domain.models.auth._
+import io.rubduk.domain.models.common._
 import io.rubduk.domain.models.media.Base64Image
-import io.rubduk.domain.typeclasses.IdConverter.{Id, _}
+import io.rubduk.domain.models.user._
+import io.rubduk.api.directives._
+import io.rubduk.application.{MediaService, UserService}
+import io.rubduk.domain._
 import zio.clock.Clock
 
 object UsersApi {

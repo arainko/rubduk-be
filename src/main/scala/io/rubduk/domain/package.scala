@@ -1,13 +1,7 @@
 package io.rubduk
 
-import io.rubduk.domain.repositories.{
-  CommentRepository,
-  MediaReadRepository,
-  MediaRepository,
-  PostRepository,
-  UserRepository
-}
-import io.rubduk.domain.services.{MediaApi, TokenValidation}
+import io.rubduk.application.{MediaApi, TokenValidation}
+import io.rubduk.domain.repositories._
 import zio.Has
 
 package object domain {

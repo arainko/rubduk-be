@@ -2,7 +2,6 @@ package io.rubduk.api
 
 import io.rubduk.Entities
 import io.rubduk.api.routes.Api
-import io.rubduk.domain.services.UserService
 import io.rubduk.suites.End2EndTestSuite
 import zio.ZIO
 import zio.blocking.effectBlocking
@@ -19,6 +18,7 @@ import akka.http.scaladsl.model.ContentTypes
 import akka.util.ByteString
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import io.circe.syntax._
+import io.rubduk.application.UserService
 import io.rubduk.domain.models.UserId
 
 object UserEndToEndSpec extends End2EndTestSuite {

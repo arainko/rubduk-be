@@ -3,8 +3,12 @@ package io.rubduk.api.serializers
 import io.circe.generic.extras.semiauto.deriveUnwrappedCodec
 import io.circe.generic.semiauto._
 import io.circe.{Codec, Decoder, Encoder}
-import io.rubduk.domain.models._
-import io.rubduk.domain.models.media.{Base64Image, ImageData, ImgurImageResponse, Link, MediumDTO}
+import io.rubduk.domain.models.auth._
+import io.rubduk.domain.models.comment._
+import io.rubduk.domain.models.common._
+import io.rubduk.domain.models.media._
+import io.rubduk.domain.models.post._
+import io.rubduk.domain.models.user._
 import io.rubduk.domain.typeclasses.IdConverter
 
 object codecs {
@@ -26,6 +30,6 @@ object codecs {
   implicit val imgurDataCodec: Codec[ImageData]              = deriveCodec
   implicit val imgurResponseCodec: Codec[ImgurImageResponse] = deriveCodec
   implicit val base64ImageCodec: Codec[Base64Image]          = deriveCodec
-  implicit val mediumCodec: Codec[MediumDTO]          = deriveCodec
+  implicit val mediumCodec: Codec[MediumDTO]                 = deriveCodec
 
 }

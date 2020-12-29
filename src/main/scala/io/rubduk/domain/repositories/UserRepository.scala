@@ -2,10 +2,10 @@ package io.rubduk.domain.repositories
 
 import io.rubduk.domain.UserRepository
 import io.rubduk.domain.errors.ApplicationError.ServerError
+import io.rubduk.domain.models.aliases._
+import io.rubduk.domain.models.common._
+import io.rubduk.domain.models.user._
 import io.rubduk.infrastructure.repositories.UserRepositoryLive
-import io.rubduk.domain.models._
-import io.rubduk.infrastructure.Filter
-import io.rubduk.infrastructure.tables.Users
 import slick.interop.zio.DatabaseProvider
 import zio.macros.accessible
 import zio.{IO, URLayer, ZLayer}
@@ -14,23 +14,23 @@ import zio.{IO, URLayer, ZLayer}
 object UserRepository {
 
   trait Service {
-    def getById(userId: UserId): IO[ServerError, Option[UserDAO]]
+    def getById(userId: UserId): IO[ServerError, Option[UserRecord]]
 
-    def getByEmail(email: String): IO[ServerError, Option[UserDAO]]
+    def getByEmail(email: String): IO[ServerError, Option[UserRecord]]
 
     def getAllPaginated(
       offset: Offset,
       limit: Limit,
-      filters: Seq[Filter[Users.Schema]]
-    ): IO[ServerError, Page[UserDAO]]
+      filters: Seq[UserFilter]
+    ): IO[ServerError, Page[UserRecord]]
 
-    def getAll(offset: Offset, limit: Limit, filters: Seq[Filter[Users.Schema]]): IO[ServerError, Seq[UserDAO]]
+    def getAll(offset: Offset, limit: Limit, filters: Seq[UserFilter]): IO[ServerError, Seq[UserRecord]]
 
-    def countFiltered(filters: Seq[Filter[Users.Schema]]): IO[ServerError, RowCount]
+    def countFiltered(filters: Seq[UserFilter]): IO[ServerError, RowCount]
 
-    def insert(user: UserDAO): IO[ServerError, UserId]
+    def insert(user: UserRecord): IO[ServerError, UserId]
 
-    def update(userId: UserId, user: UserDAO): IO[ServerError, RowCount]
+    def update(userId: UserId, user: UserRecord): IO[ServerError, RowCount]
   }
 
   val live: URLayer[DatabaseProvider, UserRepository] = ZLayer.fromFunction { database =>

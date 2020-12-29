@@ -1,17 +1,17 @@
-package io.rubduk.domain.services
-
-import java.util.UUID
+package io.rubduk.application
 
 import io.rubduk.config.AppConfig.ImgurConfig
-import io.rubduk.domain.MediaApi
+import io.rubduk.domain._
 import io.rubduk.domain.errors.ThirdPartyError
 import io.rubduk.domain.models.media.{Base64Image, ImageData, ImgurImageResponse}
+import sttp.client3.asynchttpclient.zio.SttpClient
 import sttp.client3._
-import sttp.client3.asynchttpclient.zio._
 import sttp.client3.circe._
 import zio.config.ZConfig
 import zio.macros.accessible
-import zio.{IO, URLayer, ZIO, ZLayer}
+import zio._
+
+import java.util.UUID
 
 @accessible
 object MediaApi {
@@ -35,7 +35,7 @@ object MediaApi {
         override def uploadImage(image: Base64Image): IO[ThirdPartyError, ImageData] =
           for {
             response <- sttpClient.send(uploadImageRequest(image)).mapError(ThirdPartyError)
-            body <- ZIO.fromEither(response.body).mapError(ThirdPartyError)
+            body     <- ZIO.fromEither(response.body).mapError(ThirdPartyError)
           } yield body.data
       }
     }

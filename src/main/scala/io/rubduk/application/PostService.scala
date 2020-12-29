@@ -1,16 +1,16 @@
-package io.rubduk.domain.services
+package io.rubduk.application
 
-import java.time.OffsetDateTime
-
-import cats.implicits.catsSyntaxOptionId
 import io.rubduk.domain.errors.ApplicationError
 import io.rubduk.domain.errors.PostError.{PostNotByThisUser, PostNotFound}
+import io.rubduk.domain.models.common.{Limit, Offset, Page}
+import io.rubduk.domain.models.post.{Post, PostDTO, PostFilter, PostId}
+import io.rubduk.domain.models.user.UserId
 import io.rubduk.domain.repositories.PostRepository
+import cats.syntax.option._
 import io.rubduk.domain.{PostRepository, UserRepository}
-import io.rubduk.domain.models._
-import io.rubduk.infrastructure.Filter
-import io.rubduk.infrastructure.tables.Posts
 import zio.ZIO
+
+import java.time.OffsetDateTime
 
 object PostService {
 
@@ -23,7 +23,7 @@ object PostService {
   def getAllPaginated(
     offset: Offset,
     limit: Limit,
-    filters: Filter[Posts.Schema]*
+    filters: PostFilter*
   ): ZIO[PostRepository with UserRepository, ApplicationError, Page[Post]] =
     for {
       posts <- PostRepository.getAllPaginated(offset, limit, filters)
@@ -35,7 +35,7 @@ object PostService {
   def getAll(
     offset: Offset,
     limit: Limit,
-    filters: Filter[Posts.Schema]*
+    filters: PostFilter*
   ): ZIO[PostRepository with UserRepository, ApplicationError, Seq[Post]] =
     for {
       posts <- PostRepository.getAll(offset, limit, filters)

@@ -1,19 +1,19 @@
-package io.rubduk.domain.services
+package io.rubduk.application
 
-import java.time.OffsetDateTime
-
-import cats.syntax.functor._
-import cats.syntax.option._
 import io.rubduk.domain.errors.ApplicationError
 import io.rubduk.domain.errors.ApplicationError.ServerError
 import io.rubduk.domain.errors.UserError.{UserAlreadyExists, UserNotFound}
+import io.rubduk.domain.models.auth.IdToken
+import io.rubduk.domain.models.common.{Limit, Offset, Page}
+import io.rubduk.domain.models.user.{User, UserDTO, UserFilter, UserId}
 import io.rubduk.domain.repositories.UserRepository
 import io.rubduk.domain.{TokenValidation, UserRepository}
-import io.rubduk.domain.models.Page._
-import io.rubduk.domain.models._
-import io.rubduk.infrastructure.Filter
-import io.rubduk.infrastructure.tables.Users
+import cats.syntax.option._
+import cats.syntax.functor._
+import Page._
 import zio.ZIO
+
+import java.time.OffsetDateTime
 
 object UserService {
 
@@ -46,7 +46,7 @@ object UserService {
   def getAllPaginated(
     offset: Offset,
     limit: Limit,
-    filters: Filter[Users.Schema]*
+    filters: UserFilter*
   ): ZIO[UserRepository, ServerError, Page[User]] =
     UserRepository
       .getAllPaginated(offset, limit, filters)
@@ -55,7 +55,7 @@ object UserService {
   def getAll(
     offset: Offset,
     limit: Limit,
-    filters: Filter[Users.Schema]*
+    filters: UserFilter*
   ): ZIO[UserRepository, ServerError, Seq[User]] =
     UserRepository
       .getAll(offset, limit, filters)

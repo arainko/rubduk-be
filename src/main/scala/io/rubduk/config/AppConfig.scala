@@ -4,8 +4,6 @@ import zio.config.magnolia.DeriveConfigDescriptor
 import akka.http.interop.HttpServer
 import io.rubduk.config.AppConfig.{AuthConfig, ImgurConfig}
 
-
-
 final case class AppConfig(api: HttpServer.Config, auth: AuthConfig, imgur: ImgurConfig)
 
 object AppConfig {

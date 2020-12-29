@@ -3,13 +3,13 @@ package io.rubduk.infrastructure.repositories
 import io.rubduk.domain.errors.ApplicationError._
 import io.rubduk.domain.models.media._
 import io.rubduk.domain.repositories.MediaRepository
-import io.rubduk.domain.typeclasses.IdConverter._
+import io.rubduk.infrastructure.mappers._
 import io.rubduk.infrastructure.SlickPGProfile.api._
-import io.rubduk.infrastructure.models.RowCount
 import io.rubduk.infrastructure.tables.Media
 import slick.interop.zio.DatabaseProvider
 import slick.interop.zio.syntax._
 import zio.{IO, ZIO}
+import io.rubduk.domain.models.aliases._
 
 class MediaRepositoryLive(env: DatabaseProvider) extends MediaRepository.Service {
 

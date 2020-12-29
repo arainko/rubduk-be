@@ -1,12 +1,13 @@
 package io.rubduk.infrastructure.repositories
 
 import io.rubduk.domain.errors.ApplicationError.ServerError
+import io.rubduk.domain.models.aliases._
+import io.rubduk.domain.models.common._
+import io.rubduk.domain.models.user._
 import io.rubduk.domain.repositories.UserRepository
-import io.rubduk.infrastructure.Filter.FilterOps
 import io.rubduk.infrastructure.SlickPGProfile.api._
-import io.rubduk.domain.typeclasses.IdConverter._
-import io.rubduk.domain.models._
-import io.rubduk.infrastructure.Filter
+import io.rubduk.infrastructure.filters.syntax._
+import io.rubduk.infrastructure.mappers._
 import io.rubduk.infrastructure.tables.Users
 import slick.interop.zio.DatabaseProvider
 import slick.interop.zio.syntax._
@@ -14,7 +15,7 @@ import zio.{IO, ZIO}
 
 class UserRepositoryLive(env: DatabaseProvider) extends UserRepository.Service {
 
-  override def getById(userId: UserId): IO[ServerError, Option[UserDAO]] =
+  override def getById(userId: UserId): IO[ServerError, Option[UserRecord]] =
     ZIO
       .fromDBIO {
         Users.table
@@ -25,7 +26,7 @@ class UserRepositoryLive(env: DatabaseProvider) extends UserRepository.Service {
       .mapError(ServerError)
       .provide(env)
 
-  override def getByEmail(email: String): IO[ServerError, Option[UserDAO]] =
+  override def getByEmail(email: String): IO[ServerError, Option[UserRecord]] =
     ZIO
       .fromDBIO {
         Users.table
@@ -39,17 +40,17 @@ class UserRepositoryLive(env: DatabaseProvider) extends UserRepository.Service {
   override def getAllPaginated(
     offset: Offset,
     limit: Limit,
-    filters: Seq[Filter[Users.Schema]]
-  ): IO[ServerError, Page[UserDAO]] =
+    filters: Seq[UserFilter]
+  ): IO[ServerError, Page[UserRecord]] =
     getAll(offset, limit, filters).zipPar(countFiltered(filters)).map {
       case (users, userCount) => Page(users, userCount)
     }
 
-  override def getAll(offset: Offset, limit: Limit, filters: Seq[Filter[Users.Schema]]): IO[ServerError, Seq[UserDAO]] =
+  override def getAll(offset: Offset, limit: Limit, filters: Seq[UserFilter]): IO[ServerError, Seq[UserRecord]] =
     ZIO
       .fromDBIO {
         Users.table
-          .filteredBy(filters)
+          .filteredBy(filters.map(_.interpret))
           .drop(offset.value)
           .take(limit.value)
           .result
@@ -57,15 +58,15 @@ class UserRepositoryLive(env: DatabaseProvider) extends UserRepository.Service {
       .mapError(ServerError)
       .provide(env)
 
-  override def countFiltered(filters: Seq[Filter[Users.Schema]]): IO[ServerError, RowCount] =
+  override def countFiltered(filters: Seq[UserFilter]): IO[ServerError, RowCount] =
     ZIO
       .fromDBIO {
-        Users.table.filteredBy(filters).length.result
+        Users.table.filteredBy(filters.map(_.interpret)).length.result
       }
       .mapError(ServerError)
       .provide(env)
 
-  override def insert(user: UserDAO): IO[ServerError, UserId] =
+  override def insert(user: UserRecord): IO[ServerError, UserId] =
     ZIO
       .fromDBIO {
         Users.table.returning(Users.table.map(_.id)) += user
@@ -73,7 +74,7 @@ class UserRepositoryLive(env: DatabaseProvider) extends UserRepository.Service {
       .mapError(ServerError)
       .provide(env)
 
-  override def update(userId: UserId, user: UserDAO): IO[ServerError, RowCount] =
+  override def update(userId: UserId, user: UserRecord): IO[ServerError, RowCount] =
     ZIO
       .fromDBIO {
         Users.table

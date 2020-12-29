@@ -2,11 +2,10 @@ package io.rubduk.domain.repositories
 
 import io.rubduk.domain.MediaReadRepository
 import io.rubduk.domain.errors.ApplicationError.ServerError
+import io.rubduk.domain.models.aliases._
+import io.rubduk.domain.models.common._
+import io.rubduk.domain.models.media.{MediaFilter, Medium}
 import io.rubduk.infrastructure.repositories.MediaReadRepositoryLive
-import io.rubduk.domain.models.media.Medium
-import io.rubduk.domain.models.{Limit, Offset, Page, RowCount}
-import io.rubduk.infrastructure.Filter
-import io.rubduk.infrastructure.tables.Media
 import slick.interop.zio.DatabaseProvider
 import zio.macros.accessible
 import zio.{IO, URLayer, ZLayer}
@@ -19,16 +18,16 @@ object MediaReadRepository {
     def getAll(
       offset: Offset,
       limit: Limit,
-      filters: Seq[Filter[Media.Schema]]
+      filters: Seq[MediaFilter]
     ): IO[ServerError, Seq[Medium]]
 
     def getPaginated(
       offset: Offset,
       limit: Limit,
-      filters: Seq[Filter[Media.Schema]]
+      filters: Seq[MediaFilter]
     ): IO[ServerError, Page[Medium]]
 
-    def count(filters: Seq[Filter[Media.Schema]]): IO[ServerError, RowCount]
+    def count(filters: Seq[MediaFilter]): IO[ServerError, RowCount]
   }
 
   val live: URLayer[DatabaseProvider, MediaReadRepository] =

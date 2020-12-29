@@ -1,7 +1,8 @@
 package io.rubduk.domain.models
 
-import java.time.OffsetDateTime
+import io.rubduk.domain.models.user._
 
+import java.time.OffsetDateTime
 import slick.lifted.MappedTo
 import io.scalaland.chimney.dsl._
 
@@ -21,11 +22,19 @@ object media {
         .withFieldConst(_.mediumId, mediumId)
         .transform
   }
+
   final case class MediumRecord(mediumId: MediumId, userId: UserId, link: Link, dateAdded: OffsetDateTime) {
     def toDomain: Medium = this.transformInto[Medium]
   }
+
   final case class Medium(mediumId: MediumId, userId: UserId, link: Link, dateAdded: OffsetDateTime) {
     def toDTO: MediumDTO = this.transformInto[MediumDTO]
   }
   final case class MediumDTO(mediumId: MediumId, userId: UserId, link: Link, dateAdded: OffsetDateTime)
+
+  sealed trait MediaFilter
+
+  object MediaFilter {
+    final case class ByUser(userId: UserId) extends MediaFilter
+  }
 }

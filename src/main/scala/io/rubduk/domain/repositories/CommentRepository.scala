@@ -2,11 +2,11 @@ package io.rubduk.domain.repositories
 
 import io.rubduk.domain.CommentRepository
 import io.rubduk.domain.errors.ApplicationError.ServerError
+import io.rubduk.domain.models.aliases._
+import io.rubduk.domain.models.comment._
+import io.rubduk.domain.models.common._
+import io.rubduk.domain.models.post._
 import io.rubduk.infrastructure.repositories.CommentRepositoryLive
-import io.rubduk.domain.models._
-import io.rubduk.infrastructure.Filter
-import io.rubduk.infrastructure.models.RowCount
-import io.rubduk.infrastructure.tables.Comments
 import slick.interop.zio.DatabaseProvider
 import zio.macros.accessible
 import zio.{IO, URLayer, ZLayer}
@@ -15,25 +15,25 @@ import zio.{IO, URLayer, ZLayer}
 object CommentRepository {
 
   trait Service {
-    def getById(commentId: CommentId): IO[ServerError, Option[CommentDAO]]
+    def getById(commentId: CommentId): IO[ServerError, Option[CommentRecord]]
 
     def getByPostIdPaginated(
       postId: PostId,
       offset: Offset,
       limit: Limit,
-      filters: Seq[Filter[Comments.Schema]]
-    ): IO[ServerError, Page[CommentDAO]]
+      filters: Seq[CommentFilter]
+    ): IO[ServerError, Page[CommentRecord]]
 
     def getByPostId(
       postId: PostId,
       offset: Offset,
       limit: Limit,
-      filters: Seq[Filter[Comments.Schema]]
-    ): IO[ServerError, Seq[CommentDAO]]
+      filters: Seq[CommentFilter]
+    ): IO[ServerError, Seq[CommentRecord]]
 
-    def countByPostIdFiltered(postId: PostId, filters: Seq[Filter[Comments.Schema]]): IO[ServerError, RowCount]
+    def countByPostIdFiltered(postId: PostId, filters: Seq[CommentFilter]): IO[ServerError, RowCount]
 
-    def insert(postId: PostId, comment: CommentDAO): IO[ServerError, CommentId]
+    def insert(postId: PostId, comment: CommentRecord): IO[ServerError, CommentId]
 
     def update(commentId: CommentId, contents: String): IO[ServerError, RowCount]
   }

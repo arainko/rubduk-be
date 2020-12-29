@@ -1,18 +1,20 @@
 package io.rubduk.api.routes
 
 import akka.http.scaladsl.server.Directives._
+import akka.http.scaladsl.server.Directives.post
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.MarshallingDirectives.{as => parse}
 import cats.syntax.functor._
-import io.rubduk.api.custom.AuthDirectives._
-import io.rubduk.api.serializers.unmarshallers.{IdParam, limit, offset}
+import io.rubduk.api.serializers.unmarshallers._
+import io.rubduk.domain._
 import io.rubduk.domain.errors.UserError.UserNotFound
-import io.rubduk.domain.filters._
-import io.rubduk.domain.services.{CommentService, PostService, UserService}
-import io.rubduk.domain.{CommentRepository, PostRepository, TokenValidation, UserRepository}
-import io.rubduk.domain.models._
-import io.rubduk.domain.typeclasses.IdConverter._
-import zio.{Runtime => _}
+import io.rubduk.domain.models.{post => post_}
+import post_._
+import io.rubduk.domain.models.comment._
+import io.rubduk.domain.models.common._
+import io.rubduk.domain.models.user._
+import io.rubduk.api.directives._
+import io.rubduk.application.{CommentService, PostService, UserService}
 
 object PostsApi {
 
@@ -36,8 +38,9 @@ class PostsApi(env: PostRepository with UserRepository with CommentRepository wi
         ) { (offset, limit, maybeUserId) =>
           pathEnd {
             complete {
+              val filters = Seq(maybeUserId.map(PostFilter.ByUser)).flatten
               PostService
-                .getAllPaginated(offset, limit, postUserIdFilter(maybeUserId))
+                .getAllPaginated(offset, limit, filters: _*)
                 .map(_.map(_.toDTO))
                 .provide(env)
             }

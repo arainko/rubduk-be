@@ -1,12 +1,14 @@
 package io.rubduk.infrastructure.repositories
 
 import io.rubduk.domain.errors.ApplicationError.ServerError
+import io.rubduk.domain.models.aliases._
+import io.rubduk.domain.models.comment._
+import io.rubduk.domain.models.common._
+import io.rubduk.domain.models.post._
 import io.rubduk.domain.repositories.CommentRepository
-import io.rubduk.infrastructure.Filter.FilterOps
 import io.rubduk.infrastructure.SlickPGProfile.api._
-import io.rubduk.domain.typeclasses.IdConverter._
-import io.rubduk.domain.models._
-import io.rubduk.infrastructure.Filter
+import io.rubduk.infrastructure.mappers._
+import io.rubduk.infrastructure.filters.syntax._
 import io.rubduk.infrastructure.tables.Comments
 import slick.interop.zio.DatabaseProvider
 import slick.interop.zio.syntax._
@@ -14,7 +16,7 @@ import zio.{IO, ZIO}
 
 class CommentRepositoryLive(env: DatabaseProvider) extends CommentRepository.Service {
 
-  override def getById(commentId: CommentId): IO[ServerError, Option[CommentDAO]] =
+  override def getById(commentId: CommentId): IO[ServerError, Option[CommentRecord]] =
     ZIO
       .fromDBIO {
         Comments.table
@@ -29,8 +31,8 @@ class CommentRepositoryLive(env: DatabaseProvider) extends CommentRepository.Ser
     postId: PostId,
     offset: Offset,
     limit: Limit,
-    filters: Seq[Filter[Comments.Schema]]
-  ): IO[ServerError, Page[CommentDAO]] =
+    filters: Seq[CommentFilter]
+  ): IO[ServerError, Page[CommentRecord]] =
     getByPostId(postId, offset, limit, filters)
       .zipPar(countByPostIdFiltered(postId, filters))
       .map { case (comments, count) => Page(comments, count) }
@@ -39,8 +41,8 @@ class CommentRepositoryLive(env: DatabaseProvider) extends CommentRepository.Ser
     postId: PostId,
     offset: Offset,
     limit: Limit,
-    filters: Seq[Filter[Comments.Schema]]
-  ): IO[ServerError, Seq[CommentDAO]] =
+    filters: Seq[CommentFilter]
+  ): IO[ServerError, Seq[CommentRecord]] =
     ZIO
       .fromDBIO {
         Comments.table
@@ -52,19 +54,19 @@ class CommentRepositoryLive(env: DatabaseProvider) extends CommentRepository.Ser
       .mapError(ServerError)
       .provide(env)
 
-  override def countByPostIdFiltered(postId: PostId, filters: Seq[Filter[Comments.Schema]]): IO[ServerError, RowCount] =
+  override def countByPostIdFiltered(postId: PostId, filters: Seq[CommentFilter]): IO[ServerError, RowCount] =
     ZIO
       .fromDBIO {
         Comments.table
           .filter(_.postId === postId)
-          .filteredBy(filters)
+          .filteredBy(filters.map(_.interpret))
           .length
           .result
       }
       .mapError(ServerError)
       .provide(env)
 
-  override def insert(postId: PostId, comment: CommentDAO): IO[ServerError, CommentId] =
+  override def insert(postId: PostId, comment: CommentRecord): IO[ServerError, CommentId] =
     ZIO
       .fromDBIO {
         Comments.table.returning(Comments.table.map(_.id)) += comment
