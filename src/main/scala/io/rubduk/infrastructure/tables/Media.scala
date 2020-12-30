@@ -10,11 +10,12 @@ import java.time.OffsetDateTime
 object Media {
 
   class Schema(tag: Tag) extends Table[MediumRecord](tag, "media") {
-    def id        = column[MediumId]("id", O.PrimaryKey, O.AutoInc)
-    def link      = column[Link]("link")
-    def userId    = column[UserId]("user_id")
-    def dateAdded = column[OffsetDateTime]("date_added")
-    def *         = (id, userId, link, dateAdded).mapTo[MediumRecord]
+    def id          = column[MediumId]("id", O.PrimaryKey, O.AutoInc)
+    def link        = column[Link]("link")
+    def userId      = column[UserId]("user_id")
+    def description = column[String]("description").?
+    def dateAdded   = column[OffsetDateTime]("date_added")
+    def *           = (id, userId, link, description, dateAdded).mapTo[MediumRecord]
 
     def user = foreignKey("user_fk", userId, Users.table)(user => user.id, onDelete = ForeignKeyAction.Restrict)
   }

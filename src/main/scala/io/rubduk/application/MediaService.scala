@@ -17,7 +17,7 @@ object MediaService {
 
   def insert(
     idToken: IdToken,
-    image: Base64Image
+    image: ImageRequest
   ): ZIO[
     MediaRepository with Clock with MediaApi with UserRepository with TokenValidation,
     ApplicationError,
@@ -26,9 +26,9 @@ object MediaService {
     for {
       tokenUser     <- TokenValidation.validateToken(idToken)
       userId        <- UserService.getByEmail(tokenUser.email).map(_.id).someOrFail(UserNotFound)
-      uploadedImage <- MediaApi.uploadImage(image)
+      uploadedImage <- MediaApi.uploadImage(image.base64Image)
       currentTime   <- currentDateTime.orDie
-      imageToInsert = MediumInRecord(userId, uploadedImage.link, currentTime)
+      imageToInsert = MediumInRecord(userId, uploadedImage.link, image.description, currentTime)
       insertedId <- MediaRepository.insert(imageToInsert)
     } yield insertedId
 

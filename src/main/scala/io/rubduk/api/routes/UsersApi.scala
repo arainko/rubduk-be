@@ -8,7 +8,7 @@ import io.rubduk.api.serializers.unmarshallers.{limit, offset}
 import io.rubduk.domain.errors.UserError.UserNotFound
 import io.rubduk.domain.models.auth._
 import io.rubduk.domain.models.common._
-import io.rubduk.domain.models.media.Base64Image
+import io.rubduk.domain.models.media._
 import io.rubduk.domain.models.user._
 import io.rubduk.api.directives._
 import io.rubduk.application.{MediaService, UserService}
@@ -78,7 +78,7 @@ class UsersApi(
                 .provide(env)
             }
           }
-        } ~ (path("media") & entity(parse[Base64Image]) & idToken) { (image, token) =>
+        } ~ (path("media") & entity(parse[ImageRequest]) & idToken) { (image, token) =>
           pathEnd {
             complete {
               MediaService

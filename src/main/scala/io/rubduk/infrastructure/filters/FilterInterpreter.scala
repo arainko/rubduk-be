@@ -8,8 +8,6 @@ import io.rubduk.infrastructure.SlickPGProfile.api._
 import io.rubduk.infrastructure.mappers._
 import io.rubduk.infrastructure.tables._
 
-import scala.annotation.nowarn
-
 trait FilterInterpreter[A, B] {
   def apply(filter: A): B
 }
@@ -27,10 +25,10 @@ object FilterInterpreter {
     case MediaFilter.ByUser(userId) => Filter(_.userId === userId)
   }
 
-  @nowarn
-  implicit val commentFilterInterpreter: SlickInterpreter[CommentFilter, Comments.Schema] = ???
+  implicit val commentFilterInterpreter: SlickInterpreter[CommentFilter, Comments.Schema] =
+    (_: CommentFilter) => Filter.productEmpty
 
-  @nowarn
-  implicit val userFilterInterpreter: SlickInterpreter[UserFilter, Users.Schema] = ???
+  implicit val userFilterInterpreter: SlickInterpreter[UserFilter, Users.Schema] =
+    (_: UserFilter) => Filter.productEmpty
 
 }
