@@ -29,7 +29,8 @@ object codecs {
   implicit val linkCodec: Codec[Link]                        = deriveUnwrappedCodec
   implicit val imgurDataCodec: Codec[ImageData]              = deriveCodec
   implicit val imgurResponseCodec: Codec[ImgurImageResponse] = deriveCodec
-  implicit val base64ImageCodec: Codec[Base64Image]          = deriveCodec
+  implicit val base64ImageCodec: Codec[Base64Image]          = deriveUnwrappedCodec
+  implicit val imageRequestCodec: Codec[ImageRequest]        = deriveCodec
   implicit val mediumCodec: Codec[MediumDTO]                 = deriveCodec
 
 }
