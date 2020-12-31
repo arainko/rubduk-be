@@ -1,6 +1,10 @@
 package io.rubduk.infrastructure.filters
 
+import io.rubduk.domain.typeclasses.BoolAlgebra
+import io.rubduk.infrastructure.filters.FilterInterpreter.SlickInterpreter
 import slick.lifted.Query
+import cats.syntax.functor._
+import BoolAlgebra._
 
 object syntax {
 
@@ -9,10 +13,19 @@ object syntax {
   }
 
   implicit class FilterOps[T, E](val query: Query[T, E, Seq]) extends AnyVal {
-
-    def filteredBy(filters: Seq[Filter[T]]): Query[T, E, Seq] =
-      filters.foldLeft(query) { (combinedQuery, filter) =>
-        combinedQuery.filter(filter.apply)
+    
+    private def interpretAlgebra[A](algebra: BoolAlgebra[Filter[A]]): Filter[A] =
+      algebra match {
+        case BoolAlgebra.Pure(value)      => value
+        case BoolAlgebra.And(left, right) => interpretAlgebra(left) && interpretAlgebra(right)
+        case BoolAlgebra.Or(left, right)  => interpretAlgebra(left) || interpretAlgebra(right)
+        case BoolAlgebra.Not(value)       => !interpretAlgebra(value)
       }
+
+    def filteredBy[A](filter: BoolAlgebra[A])(implicit interpreter: SlickInterpreter[A, T]): Query[T, E, Seq] =
+      query.filter(interpretAlgebra(filter.map(interpreter.apply)).apply)
+
+    def filteredBy(filter: Filter[T]): Query[T, E, Seq] =
+      query.filter(filter.apply)
   }
 }

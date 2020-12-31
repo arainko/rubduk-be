@@ -11,6 +11,7 @@ import io.rubduk.domain.{TokenValidation, UserRepository}
 import cats.syntax.option._
 import cats.syntax.functor._
 import Page._
+import io.rubduk.domain.typeclasses.BoolAlgebra
 import zio.ZIO
 
 import java.time.OffsetDateTime
@@ -46,7 +47,7 @@ object UserService {
   def getAllPaginated(
     offset: Offset,
     limit: Limit,
-    filters: UserFilter*
+    filters: BoolAlgebra[UserFilter]
   ): ZIO[UserRepository, ServerError, Page[User]] =
     UserRepository
       .getAllPaginated(offset, limit, filters)
@@ -55,7 +56,7 @@ object UserService {
   def getAll(
     offset: Offset,
     limit: Limit,
-    filters: UserFilter*
+    filters: BoolAlgebra[UserFilter]
   ): ZIO[UserRepository, ServerError, Seq[User]] =
     UserRepository
       .getAll(offset, limit, filters)
