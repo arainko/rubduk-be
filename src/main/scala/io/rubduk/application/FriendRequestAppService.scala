@@ -1,47 +1,147 @@
 package io.rubduk.application
 
-import io.rubduk.domain.errors.ApplicationError
+import io.rubduk.domain.errors.{ApplicationError, AuthenticationError}
 import io.rubduk.domain.{TokenValidation, UserRepository}
-import io.rubduk.domain.errors.FriendRequestError.{FriendRequestAlreadyApproved, FriendRequestPending, FriendRequestRejected}
+import io.rubduk.domain.errors.FriendRequestError._
 import io.rubduk.domain.errors.UserError.UserNotFound
 import io.rubduk.domain.models.auth.IdToken
-import io.rubduk.domain.models.friendrequest.FriendRequestFilter._
+import io.rubduk.domain.models.common.{Limit, Offset, Page}
+import io.rubduk.domain.models.friendrequest.FriendRequestFilter.{SentOrReceivedByUser, _}
 import io.rubduk.domain.models.friendrequest.FriendRequestStatus._
 import io.rubduk.domain.models.friendrequest._
-import io.rubduk.domain.models.user.UserId
+import io.rubduk.domain.models.user.{UserFilter, UserId}
 import io.rubduk.domain.repositories.FriendRequestRepository
 import io.rubduk.domain.services.FriendRequestService
+import Page._
+import cats.syntax.functor._
 import zio.{Has, ZIO}
 import zio.clock._
 
 object FriendRequestAppService {
 
-  def insert(request: FriendRequestRequest, idToken: IdToken): ZIO[Has[FriendRequestRepository.Service] with Clock with Has[FriendRequestService.Service] with UserRepository with TokenValidation, ApplicationError, FriendRequestId] =
+  def insert(
+    request: FriendRequestRequest,
+    idToken: IdToken
+  ): ZIO[Has[FriendRequestRepository.Service] with Clock with Has[
+    FriendRequestService.Service
+  ] with UserRepository with TokenValidation, ApplicationError, FriendRequestId] =
     for {
-      fromUserId <- UserService.authenticate(idToken).map(_.id).someOrFail(UserNotFound)
-      _ <- UserService.getById(request.toUserId)
-      validation <- verifyExistenceAndStatus(fromUserId, request.toUserId)
-        .
+      fromUserId  <- UserService.authenticate(idToken).map(_.id).someOrFail(UserNotFound)
+      _           <- UserService.getById(request.toUserId)
+      _           <- validateInsertRequest(fromUserId, request.toUserId)
       currentDate <- currentDateTime.orDie
       record = FriendRequestInRecord(fromUserId, request.toUserId, Pending, currentDate)
       insertedId <- FriendRequestRepository.insert(record)
     } yield insertedId
 
-  private def verifyExistenceAndStatus(fromUserId: UserId, toUserId: UserId) =
+  def acceptRequest(
+    requestId: FriendRequestId,
+    idToken: IdToken
+  ) =
     for {
-      request <- FriendRequestService.getSingle {
-        FriendRequestFilterAggregate(
-          SentByUser(fromUserId) ::
-          SentToUser(toUserId) ::
-          Nil
-        )
-      }
-      checked <- ZIO.succeed {
-        request.status match {
-          case Rejected => FriendRequestRejected
-          case Accepted => FriendRequestAlreadyApproved
-          case Pending => FriendRequestPending
-        }
-      }
-    } yield checked
+      request  <- FriendRequestRepository.getById(requestId).someOrFail(FriendRequestNotFound)
+      toUserId <- UserService.authenticate(idToken).map(_.id).someOrFail(UserNotFound)
+      _        <- ZIO.cond(request.status == Pending, (), FriendRequestNotPending)
+      _        <- ZIO.cond(request.toUserId == toUserId, (), AuthenticationError)
+      _        <- FriendRequestRepository.update(requestId, Accepted)
+    } yield ()
+
+  def rejectRequest(
+    requestId: FriendRequestId,
+    idToken: IdToken
+  ) =
+    for {
+      request  <- FriendRequestRepository.getById(requestId).someOrFail(FriendRequestNotFound)
+      toUserId <- UserService.authenticate(idToken).map(_.id).someOrFail(UserNotFound)
+      _        <- ZIO.cond(request.status == Pending, (), FriendRequestNotPending)
+      _        <- ZIO.cond(request.toUserId == toUserId, (), AuthenticationError)
+      _        <- FriendRequestRepository.update(requestId, Rejected)
+    } yield ()
+
+  def getPending(
+    idToken: IdToken,
+    offset: Offset,
+    limit: Limit,
+    filters: FriendRequestFilterAggregate
+  ) =
+    for {
+      userId <- UserService.authenticate(idToken).map(_.id).someOrFail(UserNotFound)
+      pendingRequests <- getRequests(
+        offset,
+        limit,
+        filters.requestFilters :+ SentToUser(userId) :+ WithStatus(Pending)
+      )
+    } yield pendingRequests.map(_.toDTO)
+
+  def getFriends(
+    idToken: IdToken,
+    offset: Offset,
+    limit: Limit,
+    filters: FriendRequestFilterAggregate
+  ): ZIO[Has[FriendRequestService.Service] with TokenValidation with UserRepository, ApplicationError, Page[
+    FriendDTO
+  ]] =
+    for {
+      userId <- UserService.authenticate(idToken).map(_.id).someOrFail(UserNotFound)
+      acceptedRequests <- getRequests(
+        offset,
+        limit,
+        filters.requestFilters :+ SentOrReceivedByUser(userId) :+ WithStatus(Accepted)
+      )
+      onlyFriends = processFriends(acceptedRequests.entities, userId)
+    } yield Page(onlyFriends, acceptedRequests.count)
+
+  private def getRequests(
+    offset: Offset,
+    limit: Limit,
+    requestFilters: Seq[FriendRequestFilter],
+    fromUserFilters: Seq[UserFilter] = Seq.empty,
+    toUserFilters: Seq[UserFilter] = Seq.empty
+  ) =
+    FriendRequestService.getPaginated(
+      offset,
+      limit,
+      FriendRequestFilterAggregate(
+        requestFilters,
+        fromUserFilters,
+        toUserFilters
+      )
+    )
+
+  private def processFriends(requests: Seq[FriendRequest], userId: UserId) = {
+    val friendRequests = requests
+    val friends = friendRequests.foldLeft(Seq.empty[FriendDTO]) { (acc, curr) =>
+      acc :+
+        curr.toDTO.toFriend(curr.fromUser.toDTO) :+
+        curr.toDTO.toFriend(curr.toUser.toDTO)
+    }
+    friends.filter(_.friend.id != Some(userId))
+  }
+
+  private def validateInsertRequest(fromUserId: UserId, toUserId: UserId) =
+    for {
+      _ <- ZIO.cond(fromUserId != toUserId, (), FriendRequestSentByYourself)
+      _ <-
+        FriendRequestService
+          .getSingle {
+            FriendRequestFilterAggregate(
+              SentByUser(fromUserId) ::
+                SentToUser(toUserId) ::
+                Nil
+            )
+          }
+          .option
+          .filterOrFail(_.isEmpty)(FriendRequestPending)
+      _ <-
+        FriendRequestService
+          .getSingle {
+            FriendRequestFilterAggregate(
+              SentByUser(toUserId) ::
+                SentToUser(fromUserId) ::
+                Nil
+            )
+          }
+          .option
+          .filterOrFail(_.isEmpty)(FriendRequestPending)
+    } yield ()
 }

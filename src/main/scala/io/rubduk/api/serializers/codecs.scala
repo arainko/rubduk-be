@@ -6,6 +6,7 @@ import io.circe.{Codec, Decoder, Encoder}
 import io.rubduk.domain.models.auth._
 import io.rubduk.domain.models.comment._
 import io.rubduk.domain.models.common._
+import io.rubduk.domain.models.friendrequest.FriendRequestRequest
 import io.rubduk.domain.models.media._
 import io.rubduk.domain.models.post._
 import io.rubduk.domain.models.user._
@@ -26,11 +27,12 @@ object codecs {
   implicit val commentCodec: Codec[CommentDTO] = deriveCodec
   implicit val tokenCodec: Codec[IdToken]      = deriveCodec
 
-  implicit val linkCodec: Codec[Link]                        = deriveUnwrappedCodec
-  implicit val imgurDataCodec: Codec[ImageData]              = deriveCodec
-  implicit val imgurResponseCodec: Codec[ImgurImageResponse] = deriveCodec
-  implicit val base64ImageCodec: Codec[Base64Image]          = deriveUnwrappedCodec
-  implicit val imageRequestCodec: Codec[ImageRequest]        = deriveCodec
-  implicit val mediumCodec: Codec[MediumDTO]                 = deriveCodec
+  implicit val linkCodec: Codec[Link]                          = deriveUnwrappedCodec
+  implicit val imgurDataCodec: Codec[ImageData]                = deriveCodec
+  implicit val imgurResponseCodec: Codec[ImgurImageResponse]   = deriveCodec
+  implicit val base64ImageCodec: Codec[Base64Image]            = deriveUnwrappedCodec
+  implicit val imageRequestCodec: Codec[ImageRequest]          = deriveCodec
+  implicit val mediumCodec: Codec[MediumDTO]                   = deriveCodec
+  implicit val friendRequestCodec: Codec[FriendRequestRequest] = deriveCodec
 
 }

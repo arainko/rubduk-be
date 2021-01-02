@@ -36,6 +36,9 @@ object FilterInterpreter {
     case FriendRequestFilter.SentByUser(userId) => Filter(_.fromUserId === userId)
     case FriendRequestFilter.SentToUser(userId) => Filter(_.toUserId === userId)
     case FriendRequestFilter.WithStatus(status) => Filter(_.status === status)
+    case FriendRequestFilter.SentOrReceivedByUser(userId) => Filter { request =>
+      request.toUserId === userId || request.fromUserId === userId
+    }
   }
 
 }

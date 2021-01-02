@@ -23,6 +23,7 @@ object friendrequest {
 
   object FriendRequestFilter {
     final case class WithStatus(status: FriendRequestStatus) extends FriendRequestFilter
+    final case class SentOrReceivedByUser(userId: UserId)    extends FriendRequestFilter
     final case class SentByUser(userId: UserId)              extends FriendRequestFilter
     final case class SentToUser(userId: UserId)              extends FriendRequestFilter
   }
@@ -75,15 +76,24 @@ object friendrequest {
       this
         .into[FriendRequestDTO]
         .withFieldComputed(_.fromUser, _.fromUser.toDTO)
-        .withFieldComputed(_.toUser, _.toUser.toDTO)
         .transform
   }
 
   final case class FriendRequestDTO(
     id: FriendRequestId,
     fromUser: UserDTO,
-    toUser: UserDTO,
     status: FriendRequestStatus,
+    dateAdded: OffsetDateTime
+  ) {
+    def toFriend(user: UserDTO): FriendDTO =
+      this.into[FriendDTO]
+        .withFieldConst(_.friend, user)
+        .transform
+  }
+
+  final case class FriendDTO(
+    id: FriendRequestId,
+    friend: UserDTO,
     dateAdded: OffsetDateTime
   )
 
