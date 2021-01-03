@@ -9,6 +9,7 @@ import io.rubduk.domain.models.common.{Limit, Offset, Page}
 import io.rubduk.domain.models.media._
 import io.rubduk.domain.models.user.UserId
 import io.rubduk.domain.repositories.{MediaReadRepository, MediaRepository}
+import io.rubduk.domain.typeclasses.syntax.BoolAlgebraOps
 import io.rubduk.domain.{MediaApi, MediaReadRepository, MediaRepository, TokenValidation, UserRepository}
 import zio.ZIO
 import zio.clock.{Clock, currentDateTime}
@@ -40,7 +41,7 @@ object MediaService {
     MediaReadRepository.getPaginated(
       offset,
       limit,
-      MediaFilter.ByUser(userId) :: Nil
+      MediaFilter.ByUser(userId).lift
     )
 
   def delete(mediumId: MediumId): ZIO[MediaRepository, ServerError, RowCount] =

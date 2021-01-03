@@ -14,8 +14,6 @@ import io.rubduk.infrastructure.tables.Comments
 import slick.interop.zio.DatabaseProvider
 import slick.interop.zio.syntax._
 import zio.{IO, ZIO}
-import cats.syntax.functor._
-import BoolAlgebra._
 
 class CommentRepositoryLive(env: DatabaseProvider) extends CommentRepository.Service {
 
@@ -65,7 +63,7 @@ class CommentRepositoryLive(env: DatabaseProvider) extends CommentRepository.Ser
       .fromDBIO {
         Comments.table
           .filter(_.postId === postId)
-          .filteredBy(filters.map(_.interpret).interpret)
+          .filteredBy(filters)
           .length
           .result
       }

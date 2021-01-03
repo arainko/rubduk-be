@@ -4,7 +4,6 @@ import io.rubduk.domain.models.comment.CommentFilter
 import io.rubduk.domain.models.media.MediaFilter
 import io.rubduk.domain.models.post.PostFilter
 import io.rubduk.domain.models.user.UserFilter
-import io.rubduk.domain.typeclasses.BoolAlgebra
 import io.rubduk.infrastructure.SlickPGProfile.api._
 import io.rubduk.infrastructure.mappers._
 import io.rubduk.infrastructure.tables._
@@ -17,17 +16,6 @@ object FilterInterpreter {
   type SlickInterpreter[A, B] = FilterInterpreter[A, Filter[B]]
 
   def apply[A, B](implicit interpreter: FilterInterpreter[A, B]): FilterInterpreter[A, B] = interpreter
-
-  implicit def boolAlgebraFilterInterpreter[A]: BoolAlgebra.Interpreter[Filter[A]] =
-    new BoolAlgebra.Interpreter[Filter[A]] {
-      override def apply(algebra: BoolAlgebra[Filter[A]]): Filter[A] =
-        algebra match {
-          case BoolAlgebra.Pure(value)      => value
-          case BoolAlgebra.And(left, right) => apply(left) && apply(right)
-          case BoolAlgebra.Or(left, right)  => apply(left) || apply(right)
-          case BoolAlgebra.Not(value)       => !apply(value)
-        }
-    }
 
   implicit val postFilterInterpreter: SlickInterpreter[PostFilter, Posts.Schema] = {
     case PostFilter.ByUser(userId) => Filter(_.userId === userId)

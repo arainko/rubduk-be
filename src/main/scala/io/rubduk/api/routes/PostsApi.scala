@@ -15,6 +15,8 @@ import io.rubduk.domain.models.common._
 import io.rubduk.domain.models.user._
 import io.rubduk.api.directives._
 import io.rubduk.application.{CommentService, PostService, UserService}
+import io.rubduk.domain.typeclasses.BoolAlgebra.True
+import typeclasses.syntax._
 
 object PostsApi {
 
@@ -38,9 +40,14 @@ class PostsApi(env: PostRepository with UserRepository with CommentRepository wi
         ) { (offset, limit, maybeUserId) =>
           pathEnd {
             complete {
-              val filters = Seq(maybeUserId.map(PostFilter.ByUser)).flatten
+
+              val filters = Seq(maybeUserId.map(PostFilter.ByUser))
+                .flatten
+                .map(_.lift)
+                .foldLeft(True[PostFilter])(_ &&& _)
+
               PostService
-                .getAllPaginated(offset, limit, filters: _*)
+                .getAllPaginated(offset, limit, filters)
                 .map(_.map(_.toDTO))
                 .provide(env)
             }
@@ -62,7 +69,7 @@ class PostsApi(env: PostRepository with UserRepository with CommentRepository wi
             pathEnd {
               complete {
                 CommentService
-                  .getByPostIdPaginated(postId, offset, limit)
+                  .getByPostIdPaginated(postId, offset, limit, True)
                   .map(_.map(_.toDTO))
                   .provide(env)
               }
