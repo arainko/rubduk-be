@@ -6,6 +6,7 @@ import io.rubduk.domain.models.comment._
 import io.rubduk.domain.models.common._
 import io.rubduk.domain.models.post._
 import io.rubduk.domain.repositories.CommentRepository
+import io.rubduk.domain.typeclasses.BoolAlgebra
 import io.rubduk.infrastructure.SlickPGProfile.api._
 import io.rubduk.infrastructure.mappers._
 import io.rubduk.infrastructure.filters.syntax._
@@ -31,7 +32,7 @@ class CommentRepositoryLive(env: DatabaseProvider) extends CommentRepository.Ser
     postId: PostId,
     offset: Offset,
     limit: Limit,
-    filters: Seq[CommentFilter]
+    filters: BoolAlgebra[CommentFilter]
   ): IO[ServerError, Page[CommentRecord]] =
     getByPostId(postId, offset, limit, filters)
       .zipPar(countByPostIdFiltered(postId, filters))
@@ -41,7 +42,7 @@ class CommentRepositoryLive(env: DatabaseProvider) extends CommentRepository.Ser
     postId: PostId,
     offset: Offset,
     limit: Limit,
-    filters: Seq[CommentFilter]
+    filters: BoolAlgebra[CommentFilter]
   ): IO[ServerError, Seq[CommentRecord]] =
     ZIO
       .fromDBIO {
@@ -54,12 +55,15 @@ class CommentRepositoryLive(env: DatabaseProvider) extends CommentRepository.Ser
       .mapError(ServerError)
       .provide(env)
 
-  override def countByPostIdFiltered(postId: PostId, filters: Seq[CommentFilter]): IO[ServerError, RowCount] =
+  override def countByPostIdFiltered(
+    postId: PostId,
+    filters: BoolAlgebra[CommentFilter]
+  ): IO[ServerError, RowCount] =
     ZIO
       .fromDBIO {
         Comments.table
           .filter(_.postId === postId)
-          .filteredBy(filters.map(_.interpret))
+          .filteredBy(filters)
           .length
           .result
       }

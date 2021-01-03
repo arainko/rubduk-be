@@ -7,6 +7,7 @@ import io.rubduk.domain.models.post.{Post, PostDTO, PostFilter, PostId}
 import io.rubduk.domain.models.user.UserId
 import io.rubduk.domain.repositories.PostRepository
 import cats.syntax.option._
+import io.rubduk.domain.typeclasses.BoolAlgebra
 import io.rubduk.domain.{PostRepository, UserRepository}
 import zio.ZIO
 
@@ -23,7 +24,7 @@ object PostService {
   def getAllPaginated(
     offset: Offset,
     limit: Limit,
-    filters: PostFilter*
+    filters: BoolAlgebra[PostFilter]
   ): ZIO[PostRepository with UserRepository, ApplicationError, Page[Post]] =
     for {
       posts <- PostRepository.getAllPaginated(offset, limit, filters)
@@ -35,7 +36,7 @@ object PostService {
   def getAll(
     offset: Offset,
     limit: Limit,
-    filters: PostFilter*
+    filters: BoolAlgebra[PostFilter]
   ): ZIO[PostRepository with UserRepository, ApplicationError, Seq[Post]] =
     for {
       posts <- PostRepository.getAll(offset, limit, filters)

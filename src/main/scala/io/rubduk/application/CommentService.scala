@@ -10,6 +10,7 @@ import io.rubduk.domain.models.common.{Limit, Offset, Page}
 import io.rubduk.domain.models.post.PostId
 import io.rubduk.domain.models.user.UserId
 import io.rubduk.domain.repositories.{CommentRepository, PostRepository}
+import io.rubduk.domain.typeclasses.BoolAlgebra
 import io.rubduk.domain.{CommentRepository, PostRepository, UserRepository}
 import zio.ZIO
 
@@ -21,7 +22,7 @@ object CommentService {
     postId: PostId,
     offset: Offset,
     limit: Limit,
-    filters: CommentFilter*
+    filters: BoolAlgebra[CommentFilter]
   ): ZIO[CommentRepository with PostRepository with UserRepository, ApplicationError, Page[Comment]] =
     for {
       _        <- PostRepository.getById(postId).someOrFail(PostNotFound)
@@ -35,7 +36,7 @@ object CommentService {
     postId: PostId,
     offset: Offset,
     limit: Limit,
-    filters: CommentFilter*
+    filters: BoolAlgebra[CommentFilter]
   ): ZIO[CommentRepository with PostRepository with UserRepository, ApplicationError, Seq[Comment]] =
     for {
       _        <- PostRepository.getById(postId).someOrFail(PostNotFound)

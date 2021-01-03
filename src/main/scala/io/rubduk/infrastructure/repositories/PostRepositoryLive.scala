@@ -5,6 +5,7 @@ import io.rubduk.domain.models.aliases._
 import io.rubduk.domain.models.common._
 import io.rubduk.domain.models.post._
 import io.rubduk.domain.repositories.PostRepository
+import io.rubduk.domain.typeclasses.BoolAlgebra
 import io.rubduk.infrastructure.SlickPGProfile.api._
 import io.rubduk.infrastructure.filters.syntax._
 import io.rubduk.infrastructure.mappers._
@@ -29,17 +30,17 @@ class PostRepositoryLive(env: DatabaseProvider) extends PostRepository.Service {
   override def getAllPaginated(
     offset: Offset,
     limit: Limit,
-    filters: Seq[PostFilter]
+    filters: BoolAlgebra[PostFilter]
   ): IO[ServerError, Page[PostRecord]] =
     getAll(offset, limit, filters).zipPar(countFiltered(filters)).map {
       case (posts, postCount) => Page(posts, postCount)
     }
 
-  override def getAll(offset: Offset, limit: Limit, filters: Seq[PostFilter]): IO[ServerError, Seq[PostRecord]] =
+  override def getAll(offset: Offset, limit: Limit, filters: BoolAlgebra[PostFilter]): IO[ServerError, Seq[PostRecord]] =
     ZIO
       .fromDBIO {
         Posts.table
-          .filteredBy(filters.map(_.interpret))
+          .filteredBy(filters)
           .drop(offset.value)
           .take(limit.value)
           .result
@@ -47,10 +48,10 @@ class PostRepositoryLive(env: DatabaseProvider) extends PostRepository.Service {
       .mapError(ServerError)
       .provide(env)
 
-  override def countFiltered(filters: Seq[PostFilter]): IO[ServerError, RowCount] =
+  override def countFiltered(filters: BoolAlgebra[PostFilter]): IO[ServerError, RowCount] =
     ZIO
       .fromDBIO {
-        Posts.table.filteredBy(filters.map(_.interpret)).length.result
+        Posts.table.filteredBy(filters).length.result
       }
       .mapError(ServerError)
       .provide(env)

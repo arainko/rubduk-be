@@ -16,6 +16,9 @@ trait Filter[T] { self =>
   final def || (f2: Filter[T]): Filter[T] =
     (table: T) => self(table) || f2(table)
 
+  final def unary_! : Filter[T] =
+    (table: T) => !self(table)
+
   @nowarn final def joinable(implicit ev: T <:!< Product): Filter[Tuple1[T]] =
     (table: Tuple1[T]) => self(table._1)
 

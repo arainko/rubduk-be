@@ -5,6 +5,7 @@ import io.rubduk.domain.errors.ApplicationError.ServerError
 import io.rubduk.domain.models.aliases._
 import io.rubduk.domain.models.common._
 import io.rubduk.domain.models.user._
+import io.rubduk.domain.typeclasses.BoolAlgebra
 import io.rubduk.infrastructure.repositories.UserRepositoryLive
 import slick.interop.zio.DatabaseProvider
 import zio.macros.accessible
@@ -21,12 +22,12 @@ object UserRepository {
     def getAllPaginated(
       offset: Offset,
       limit: Limit,
-      filters: Seq[UserFilter]
+      filters: BoolAlgebra[UserFilter]
     ): IO[ServerError, Page[UserRecord]]
 
-    def getAll(offset: Offset, limit: Limit, filters: Seq[UserFilter]): IO[ServerError, Seq[UserRecord]]
+    def getAll(offset: Offset, limit: Limit, filters: BoolAlgebra[UserFilter]): IO[ServerError, Seq[UserRecord]]
 
-    def countFiltered(filters: Seq[UserFilter]): IO[ServerError, RowCount]
+    def countFiltered(filters: BoolAlgebra[UserFilter]): IO[ServerError, RowCount]
 
     def insert(user: UserRecord): IO[ServerError, UserId]
 

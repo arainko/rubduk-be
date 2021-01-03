@@ -13,6 +13,7 @@ import io.rubduk.domain.models.user._
 import io.rubduk.api.directives._
 import io.rubduk.application.{MediaService, UserService}
 import io.rubduk.domain._
+import io.rubduk.domain.typeclasses.BoolAlgebra
 import zio.clock.Clock
 
 object UsersApi {
@@ -39,7 +40,7 @@ class UsersApi(
           pathEnd {
             complete {
               UserService
-                .getAllPaginated(offset, limit)
+                .getAllPaginated(offset, limit, BoolAlgebra.True)
                 .map(_.map(_.toDTO))
                 .provide(env)
             }
