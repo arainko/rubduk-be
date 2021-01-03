@@ -2,7 +2,7 @@ package io.rubduk.infrastructure.services
 
 import io.rubduk.domain.errors.ApplicationError
 import io.rubduk.domain.errors.ApplicationError.ServerError
-import io.rubduk.domain.errors.FriendRequestError.FriendRequestNotFound
+import io.rubduk.domain.errors.ApplicationError._
 import io.rubduk.domain.models.common._
 import io.rubduk.domain.models.friendrequest._
 import io.rubduk.domain.services.FriendRequestService

@@ -1,7 +1,7 @@
 package io.rubduk.application
 
 import io.rubduk.domain.errors.ApplicationError
-import io.rubduk.domain.errors.PostError.{PostNotByThisUser, PostNotFound}
+import io.rubduk.domain.errors.ApplicationError._
 import io.rubduk.domain.models.common.{Limit, Offset, Page}
 import io.rubduk.domain.models.post.{Post, PostDTO, PostFilter, PostId}
 import io.rubduk.domain.models.user.UserId

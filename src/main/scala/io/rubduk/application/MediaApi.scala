@@ -2,7 +2,7 @@ package io.rubduk.application
 
 import io.rubduk.config.AppConfig.ImgurConfig
 import io.rubduk.domain._
-import io.rubduk.domain.errors.ThirdPartyError
+import io.rubduk.domain.errors.ApplicationError._
 import io.rubduk.domain.models.media.{Base64Image, ImageData, ImgurImageResponse}
 import sttp.client3.asynchttpclient.zio.SttpClient
 import sttp.client3._

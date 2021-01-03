@@ -5,7 +5,7 @@ import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
 import io.rubduk.config.AppConfig.AuthConfig
 import io.rubduk.domain.TokenValidation
-import io.rubduk.domain.errors.ValidationError
+import io.rubduk.domain.errors.ApplicationError._
 import io.rubduk.domain.models.auth.{IdToken, TokenUser}
 import shapeless.syntax.typeable.typeableOps
 import cats.implicits._

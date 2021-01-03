@@ -1,8 +1,7 @@
 package io.rubduk.application
 
 import io.rubduk.domain.errors.ApplicationError
-import io.rubduk.domain.errors.ApplicationError.ServerError
-import io.rubduk.domain.errors.UserError.UserNotFound
+import io.rubduk.domain.errors.ApplicationError._
 import io.rubduk.domain.models.aliases.RowCount
 import io.rubduk.domain.models.auth.IdToken
 import io.rubduk.domain.models.common.{Limit, Offset, Page}
