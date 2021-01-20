@@ -3,6 +3,8 @@ package io.rubduk.domain.models
 import enumeratum._
 import io.scalaland.chimney.dsl._
 import io.rubduk.domain.models.user._
+import io.rubduk.domain.typeclasses.BoolAlgebra
+import io.rubduk.domain.typeclasses.BoolAlgebra.True
 
 import java.time.OffsetDateTime
 
@@ -23,15 +25,14 @@ object friendrequest {
 
   object FriendRequestFilter {
     final case class WithStatus(status: FriendRequestStatus) extends FriendRequestFilter
-    final case class SentOrReceivedByUser(userId: UserId)    extends FriendRequestFilter
     final case class SentByUser(userId: UserId)              extends FriendRequestFilter
     final case class SentToUser(userId: UserId)              extends FriendRequestFilter
   }
 
   final case class FriendRequestFilterAggregate(
-    requestFilters: Seq[FriendRequestFilter] = Seq.empty,
-    fromUserFilters: Seq[UserFilter] = Seq.empty,
-    toUserFilters: Seq[UserFilter] = Seq.empty
+    requestFilters: BoolAlgebra[FriendRequestFilter] = True,
+    fromUserFilters: BoolAlgebra[UserFilter] = True,
+    toUserFilters: BoolAlgebra[UserFilter] = True
   )
 
   final case class FriendRequestRecord(
@@ -85,8 +86,10 @@ object friendrequest {
     status: FriendRequestStatus,
     dateAdded: OffsetDateTime
   ) {
+
     def toFriend(user: UserDTO): FriendDTO =
-      this.into[FriendDTO]
+      this
+        .into[FriendDTO]
         .withFieldConst(_.friend, user)
         .transform
   }

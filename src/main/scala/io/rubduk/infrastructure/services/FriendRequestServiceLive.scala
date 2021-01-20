@@ -18,9 +18,9 @@ class FriendRequestServiceLive(env: DatabaseProvider) extends FriendRequestServi
 
   private def joinedRequests(filters: FriendRequestFilterAggregate) =
     for {
-      reqs <- FriendRequests.table.filteredBy(filters.requestFilters.map(_.interpret))
-      fromUser <- Users.table.filteredBy(filters.fromUserFilters.map(_.interpret)) if reqs.fromUserId === fromUser.id
-      toUser <- Users.table.filteredBy(filters.toUserFilters.map(_.interpret)) if reqs.toUserId === toUser.id
+      reqs <- FriendRequests.table.filteredBy(filters.requestFilters)
+      fromUser <- Users.table.filteredBy(filters.fromUserFilters) if reqs.fromUserId === fromUser.id
+      toUser <- Users.table.filteredBy(filters.toUserFilters) if reqs.toUserId === toUser.id
     } yield (reqs, fromUser, toUser)
 
   override def getPaginated(

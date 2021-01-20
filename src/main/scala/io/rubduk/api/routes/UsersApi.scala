@@ -14,8 +14,7 @@ import io.rubduk.domain.models.user._
 import io.rubduk.api.directives._
 import io.rubduk.application.{MediaService, UserService}
 import io.rubduk.domain._
-import io.rubduk.domain.typeclasses.BoolAlgebra
-import io.rubduk.domain.typeclasses.BoolAlgebra.True
+import io.rubduk.domain.typeclasses.BoolAlgebra._
 import io.rubduk.domain.typeclasses.syntax.BoolAlgebraOps
 import zio.clock.Clock
 

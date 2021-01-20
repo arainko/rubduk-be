@@ -31,16 +31,18 @@ object FilterInterpreter {
 
   implicit val userFilterInterpreter: SlickInterpreter[UserFilter, Users.Schema] = {
       case UserFilter.NameContaining(name) =>
-        Filter(_.name.toLowerCase.like(s"%${name.toLowerCase}%"))
+        Filter { user =>
+          val normalizedName = user.name.toLowerCase
+          val normalizedSurname = user.lastName.toLowerCase.getOrElse("")
+          (normalizedName ++ " " ++ normalizedSurname).like(s"%${name.toLowerCase}%") ||
+          (normalizedSurname ++ " " ++ normalizedSurname).like(s"%${name.toLowerCase}%")
+        }
     }
 
   implicit val friendRequestFilterInterpreter: SlickInterpreter[FriendRequestFilter, FriendRequests.Schema] = {
     case FriendRequestFilter.SentByUser(userId) => Filter(_.fromUserId === userId)
     case FriendRequestFilter.SentToUser(userId) => Filter(_.toUserId === userId)
     case FriendRequestFilter.WithStatus(status) => Filter(_.status === status)
-    case FriendRequestFilter.SentOrReceivedByUser(userId) => Filter { request =>
-      request.toUserId === userId || request.fromUserId === userId
-    }
   }
 
 }
