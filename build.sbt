@@ -57,6 +57,7 @@ val root = (project in file("."))
       "com.github.tminglei"           %% "slick-pg"                        % "0.19.3",
       "org.typelevel"                 %% "cats-core"                       % "2.2.0",
       "io.scalaland"                  %% "chimney"                         % "0.6.0",
+      "com.beachape"                  %% "enumeratum"                      % "1.6.1",
       "com.softwaremill.sttp.client3" %% "async-http-client-backend-zio"   % sttpVersion,
       "com.softwaremill.sttp.client3" %% "circe"                           % sttpVersion,
       "org.flywaydb"                   % "flyway-core"                     % flywayVersion,

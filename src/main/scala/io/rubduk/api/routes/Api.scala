@@ -7,8 +7,9 @@ import io.rubduk.api.Api
 import io.rubduk.domain._
 import zio.clock.Clock
 import zio.config.ZConfig
-import zio.{URIO, ZIO, ZLayer}
+import zio.{Has, URIO, ZIO, ZLayer}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import io.rubduk.domain.services.FriendRequestService
 
 object Api {
 
@@ -18,12 +19,22 @@ object Api {
 
   val live: ZLayer[ZConfig[
     HttpServer.Config
-  ] with PostRepository with UserRepository with CommentRepository with TokenValidation with MediaApi with MediaReadRepository with MediaRepository with Clock, Nothing, Api] =
+  ] with PostRepository
+    with UserRepository
+    with CommentRepository
+    with TokenValidation
+    with MediaApi
+    with MediaReadRepository
+    with MediaRepository
+    with Clock
+    with FriendRequestRepository
+    with Has[FriendRequestService.Service],
+    Nothing, Api] =
     ZLayer.fromFunction { env =>
       new Service {
         def routes: Route =
           cors() {
-            PostsApi(env) ~ UsersApi(env)
+            PostsApi(env) ~ UsersApi(env) ~ new FriendRequestApi(env).routes
           }
       }
     }

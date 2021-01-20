@@ -1,17 +1,17 @@
 package io.rubduk.api.routes
 
-import akka.http.scaladsl.server.Directives._
-import akka.http.scaladsl.server.Directives.post
+import akka.http.scaladsl.server.Directives.{post, _}
 import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.MarshallingDirectives.{as => parse}
 import cats.syntax.functor._
+import io.rubduk.api.directives._
 import io.rubduk.api.serializers.unmarshallers._
+import io.rubduk.domain.errors.ApplicationError._
+import io.rubduk.application.{CommentService, PostService, UserService}
 import io.rubduk.domain._
-import io.rubduk.domain.errors.UserError.UserNotFound
-import io.rubduk.domain.models.{post => post_}
-import post_._
 import io.rubduk.domain.models.comment._
 import io.rubduk.domain.models.common._
+import io.rubduk.domain.models.post._
 import io.rubduk.domain.models.user._
 import io.rubduk.api.directives._
 import io.rubduk.application.{CommentService, PostService, UserService}
@@ -28,7 +28,7 @@ class PostsApi(env: PostRepository with UserRepository with CommentRepository wi
     extends Api.Service {
   import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
   import io.rubduk.api.serializers.codecs._
-  import io.rubduk.domain.errors._
+  import io.rubduk.api.errors._
 
   override def routes: Route =
     pathPrefix("api" / "posts") {

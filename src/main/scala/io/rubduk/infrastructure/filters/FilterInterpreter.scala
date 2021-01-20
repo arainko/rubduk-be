@@ -1,6 +1,7 @@
 package io.rubduk.infrastructure.filters
 
 import io.rubduk.domain.models.comment.CommentFilter
+import io.rubduk.domain.models.friendrequest.FriendRequestFilter
 import io.rubduk.domain.models.media.MediaFilter
 import io.rubduk.domain.models.post.PostFilter
 import io.rubduk.domain.models.user.UserFilter
@@ -32,5 +33,14 @@ object FilterInterpreter {
       case UserFilter.NameContaining(name) =>
         Filter(_.name.toLowerCase.like(s"%${name.toLowerCase}%"))
     }
+
+  implicit val friendRequestFilterInterpreter: SlickInterpreter[FriendRequestFilter, FriendRequests.Schema] = {
+    case FriendRequestFilter.SentByUser(userId) => Filter(_.fromUserId === userId)
+    case FriendRequestFilter.SentToUser(userId) => Filter(_.toUserId === userId)
+    case FriendRequestFilter.WithStatus(status) => Filter(_.status === status)
+    case FriendRequestFilter.SentOrReceivedByUser(userId) => Filter { request =>
+      request.toUserId === userId || request.fromUserId === userId
+    }
+  }
 
 }

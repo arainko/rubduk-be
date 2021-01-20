@@ -5,7 +5,8 @@ import akka.http.scaladsl.server.Route
 import akka.http.scaladsl.server.directives.MarshallingDirectives.{as => parse}
 import cats.syntax.functor._
 import io.rubduk.api.serializers.unmarshallers.{limit, offset}
-import io.rubduk.domain.errors.UserError.UserNotFound
+import io.rubduk.domain.errors.ApplicationError._
+
 import io.rubduk.domain.models.auth._
 import io.rubduk.domain.models.common._
 import io.rubduk.domain.models.media._
@@ -30,7 +31,7 @@ class UsersApi(
 ) extends Api.Service {
   import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
   import io.rubduk.api.serializers.codecs._
-  import io.rubduk.domain.errors._
+  import io.rubduk.api.errors._
 
   override def routes: Route =
     pathPrefix("api" / "users") {
