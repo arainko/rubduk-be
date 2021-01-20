@@ -62,7 +62,22 @@ class FriendRequestApi(
             }
           }
         }
-      } ~ path("accept" / Id[FriendRequestId]) { id =>
+      } ~ path("pending" / "sent") {
+        (get & idToken) { token =>
+          parameters(
+            "offset".as(offset) ? Offset(0),
+            "limit".as(limit) ? Limit(50),
+          ) { (offset, limit) =>
+            pathEnd {
+              complete {
+                FriendRequestAppService
+                  .getSent(token, offset, limit, FriendRequestFilterAggregate())
+                  .provide(env)
+              }
+            }
+          }
+        }
+      }~ path("accept" / Id[FriendRequestId]) { id =>
         (post & idToken) { token =>
           pathEnd {
             complete {

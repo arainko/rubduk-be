@@ -77,12 +77,14 @@ object friendrequest {
       this
         .into[FriendRequestDTO]
         .withFieldComputed(_.fromUser, _.fromUser.toDTO)
+        .withFieldComputed(_.toUser, _.toUser.toDTO)
         .transform
   }
 
   final case class FriendRequestDTO(
     id: FriendRequestId,
     fromUser: UserDTO,
+    toUser: UserDTO,
     status: FriendRequestStatus,
     dateAdded: OffsetDateTime
   ) {

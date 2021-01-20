@@ -77,13 +77,26 @@ object FriendRequestAppService {
       )
     } yield pendingRequests.map(_.toDTO)
 
+  def getSent(
+    idToken: IdToken,
+    offset: Offset,
+    limit: Limit,
+    filters: FriendRequestFilterAggregate
+  ): ZIO[Has[FriendRequestService.Service] with TokenValidation with UserRepository, ApplicationError, Page[FriendRequestDTO]] =
+    for {
+      userId <- UserService.authenticate(idToken).map(_.id).someOrFail(UserNotFound)
+      sentRequests <- getRequests(
+        offset, limit, filters.requestFilters &&& SentByUser(userId) &&& WithStatus(Pending)
+      )
+    } yield sentRequests.map(_.toDTO)
+
   def getFriends(
     idToken: IdToken,
     offset: Offset,
     limit: Limit,
     filters: FriendRequestFilterAggregate
   ): ZIO[Has[FriendRequestService.Service] with TokenValidation with UserRepository, ApplicationError, Page[
-    FriendDTO
+    FriendRequestDTO
   ]] =
     for {
       userId <- UserService.authenticate(idToken).map(_.id).someOrFail(UserNotFound)
@@ -92,8 +105,7 @@ object FriendRequestAppService {
         limit,
         filters.requestFilters &&& (SentToUser(userId).lift ||| SentByUser(userId)) &&& WithStatus(Accepted)
       )
-      onlyFriends = processFriends(acceptedRequests.entities, userId)
-    } yield Page(onlyFriends, acceptedRequests.count)
+    } yield acceptedRequests.map(_.toDTO)
 
   private def getRequests(
     offset: Offset,
@@ -111,16 +123,6 @@ object FriendRequestAppService {
         toUserFilters
       )
     )
-
-  private def processFriends(requests: Seq[FriendRequest], userId: UserId) = {
-    val friendRequests = requests
-    val friends = friendRequests.foldLeft(Seq.empty[FriendDTO]) { (acc, curr) =>
-      acc :+
-        curr.toDTO.toFriend(curr.fromUser.toDTO) :+
-        curr.toDTO.toFriend(curr.toUser.toDTO)
-    }
-    friends.filter(_.friend.id != Some(userId))
-  }
 
   private def validateInsertRequest(fromUserId: UserId, toUserId: UserId) =
     for {
