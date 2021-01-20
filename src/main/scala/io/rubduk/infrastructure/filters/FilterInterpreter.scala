@@ -28,7 +28,9 @@ object FilterInterpreter {
   implicit val commentFilterInterpreter: SlickInterpreter[CommentFilter, Comments.Schema] =
     (_: CommentFilter) => Filter.productEmpty
 
-  implicit val userFilterInterpreter: SlickInterpreter[UserFilter, Users.Schema] =
-    (_: UserFilter) => Filter.productEmpty
+  implicit val userFilterInterpreter: SlickInterpreter[UserFilter, Users.Schema] = {
+      case UserFilter.NameContaining(name) =>
+        Filter(_.name.toLowerCase.like(s"%${name.toLowerCase}%"))
+    }
 
 }

@@ -54,5 +54,8 @@ object user {
   }
 
   sealed trait UserFilter
+  object UserFilter {
+    final case class NameContaining(name: String) extends UserFilter
+  }
 
 }

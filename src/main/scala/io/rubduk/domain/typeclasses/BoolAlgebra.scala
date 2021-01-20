@@ -5,7 +5,9 @@ import cats.Functor
 
 sealed trait BoolAlgebra[+A] {
   final def &&& [B >: A](that: BoolAlgebra[B]): BoolAlgebra[B] = And(this, that)
+  final def &&& [B >: A](that: B): BoolAlgebra[B]              = And(this, Pure(that))
   final def ||| [B >: A](that: BoolAlgebra[B]): BoolAlgebra[B] = Or(this, that)
+  final def ||| [B >: A](that: B): BoolAlgebra[B]              = Or(this, Pure(that))
   final def unary_! : BoolAlgebra[A]                           = Not(this)
 }
 

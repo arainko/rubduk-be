@@ -14,6 +14,8 @@ import io.rubduk.api.directives._
 import io.rubduk.application.{MediaService, UserService}
 import io.rubduk.domain._
 import io.rubduk.domain.typeclasses.BoolAlgebra
+import io.rubduk.domain.typeclasses.BoolAlgebra.True
+import io.rubduk.domain.typeclasses.syntax.BoolAlgebraOps
 import zio.clock.Clock
 
 object UsersApi {
@@ -35,12 +37,17 @@ class UsersApi(
       get {
         parameters(
           "offset".as(offset) ? Offset(0),
-          "limit".as(limit) ? Limit(10)
-        ) { (offset, limit) =>
+          "limit".as(limit) ? Limit(10),
+          "name".as[String].optional
+        ) { (offset, limit, name) =>
           pathEnd {
             complete {
+              val filters = name
+                .map(UserFilter.NameContaining)
+                .map(_.lift)
+                .getOrElse(True)
               UserService
-                .getAllPaginated(offset, limit, BoolAlgebra.True)
+                .getAllPaginated(offset, limit, filters)
                 .map(_.map(_.toDTO))
                 .provide(env)
             }
@@ -57,7 +64,7 @@ class UsersApi(
         } ~ path(Id[UserId] / "media") { userId =>
           parameters(
             "offset".as(offset) ? Offset(0),
-            "limit".as(limit) ? Limit(10)
+            "limit".as(limit) ? Limit(10),
           ) { (offset, limit) =>
             pathEnd {
               complete {
