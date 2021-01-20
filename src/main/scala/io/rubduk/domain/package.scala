@@ -2,6 +2,7 @@ package io.rubduk
 
 import io.rubduk.application.{MediaApi, TokenValidation}
 import io.rubduk.domain.repositories._
+import io.rubduk.domain.services.MediaReadService
 import zio.Has
 
 package object domain {
@@ -11,6 +12,6 @@ package object domain {
   type TokenValidation         = Has[TokenValidation.Service]
   type MediaApi                = Has[MediaApi.Service]
   type MediaRepository         = Has[MediaRepository.Service]
-  type MediaReadRepository     = Has[MediaReadRepository.Service]
+  type MediaReadRepository     = Has[MediaReadService.Service]
   type FriendRequestRepository = Has[FriendRequestRepository.Service]
 }

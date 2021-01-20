@@ -67,4 +67,15 @@ class FriendRequestServiceLive(env: DatabaseProvider) extends FriendRequestServi
       .unrefineTo[ApplicationError]
       .someOrFail(FriendRequestNotFound)
       .provide(env)
+
+  override def getAllUnbounded(filters: FriendRequestFilterAggregate): IO[ApplicationError, Seq[FriendRequest]] =
+    ZIO
+      .fromDBIO {
+        joinedRequests(filters).result
+      }
+      .bimap(
+        ServerError,
+        _.map { case (request, fromUser, toUser) => request.toDomain(fromUser, toUser) }
+      )
+      .provide(env)
 }

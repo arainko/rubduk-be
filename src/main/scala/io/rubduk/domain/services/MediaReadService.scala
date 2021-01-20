@@ -1,18 +1,18 @@
-package io.rubduk.domain.repositories
+package io.rubduk.domain.services
 
 import io.rubduk.domain.MediaReadRepository
 import io.rubduk.domain.errors.ApplicationError.ServerError
-import io.rubduk.domain.models.aliases._
-import io.rubduk.domain.models.common._
+import io.rubduk.domain.models.aliases.RowCount
+import io.rubduk.domain.models.common.{Limit, Offset, Page}
 import io.rubduk.domain.models.media.{MediaFilter, Medium}
 import io.rubduk.domain.typeclasses.BoolAlgebra
-import io.rubduk.infrastructure.repositories.MediaReadRepositoryLive
+import io.rubduk.infrastructure.services.MediaReadServiceLive
 import slick.interop.zio.DatabaseProvider
 import zio.macros.accessible
 import zio.{IO, URLayer, ZLayer}
 
 @accessible
-object MediaReadRepository {
+object MediaReadService {
 
   trait Service {
 
@@ -32,5 +32,5 @@ object MediaReadRepository {
   }
 
   val live: URLayer[DatabaseProvider, MediaReadRepository] =
-    ZLayer.fromFunction(new MediaReadRepositoryLive(_))
+    ZLayer.fromFunction(new MediaReadServiceLive(_))
 }

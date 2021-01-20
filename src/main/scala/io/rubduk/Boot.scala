@@ -9,7 +9,7 @@ import io.rubduk.api.routes.Api
 import io.rubduk.application.{MediaApi, TokenValidation}
 import io.rubduk.config.AppConfig
 import io.rubduk.domain.repositories._
-import io.rubduk.domain.services.FriendRequestService
+import io.rubduk.domain.services.{FriendRequestService, MediaReadService}
 import io.rubduk.infrastructure.flyway.FlywayProvider
 import slick.interop.zio.DatabaseProvider
 import slick.jdbc.PostgresProfile
@@ -54,7 +54,7 @@ object Boot extends App {
           PostRepository.live ++
             UserRepository.live ++
             CommentRepository.live ++
-            MediaReadRepository.live ++
+            MediaReadService.live ++
             MediaRepository.live ++
             FriendRequestRepository.live ++
             FriendRequestService.live

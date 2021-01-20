@@ -27,6 +27,10 @@ object FriendRequestService {
       filters: FriendRequestFilterAggregate
     ): IO[ApplicationError, Seq[FriendRequest]]
 
+    def getAllUnbounded(
+      filters: FriendRequestFilterAggregate
+    ): IO[ApplicationError, Seq[FriendRequest]]
+
   }
 
   val live: URLayer[DatabaseProvider, Has[FriendRequestService.Service]] =

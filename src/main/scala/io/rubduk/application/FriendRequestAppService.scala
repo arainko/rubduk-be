@@ -9,12 +9,15 @@ import io.rubduk.domain.models.friendrequest.FriendRequestStatus._
 import io.rubduk.domain.models.friendrequest._
 import io.rubduk.domain.models.user.{UserFilter, UserId}
 import io.rubduk.domain.repositories.FriendRequestRepository
-import io.rubduk.domain.services.FriendRequestService
-import io.rubduk.domain.{TokenValidation, UserRepository}
+import io.rubduk.domain.services.{FriendRequestService, MediaReadService}
+import io.rubduk.domain.{PostRepository, TokenValidation, UserRepository}
 import Page._
 import cats.syntax.functor._
+import io.rubduk.domain.models.media.{MediaFilter, MediumDTO}
+import io.rubduk.domain.models.post
+import io.rubduk.domain.models.post.PostFilter
 import io.rubduk.domain.typeclasses.BoolAlgebra
-import io.rubduk.domain.typeclasses.BoolAlgebra.True
+import io.rubduk.domain.typeclasses.BoolAlgebra.{False, True}
 import io.rubduk.domain.typeclasses.syntax.BoolAlgebraOps
 import zio.clock._
 import zio.{Has, ZIO}
@@ -82,11 +85,15 @@ object FriendRequestAppService {
     offset: Offset,
     limit: Limit,
     filters: FriendRequestFilterAggregate
-  ): ZIO[Has[FriendRequestService.Service] with TokenValidation with UserRepository, ApplicationError, Page[FriendRequestDTO]] =
+  ): ZIO[Has[FriendRequestService.Service] with TokenValidation with UserRepository, ApplicationError, Page[
+    FriendRequestDTO
+  ]] =
     for {
       userId <- UserService.authenticate(idToken).map(_.id).someOrFail(UserNotFound)
       sentRequests <- getRequests(
-        offset, limit, filters.requestFilters &&& SentByUser(userId) &&& WithStatus(Pending)
+        offset,
+        limit,
+        filters.requestFilters &&& SentByUser(userId) &&& WithStatus(Pending)
       )
     } yield sentRequests.map(_.toDTO)
 
@@ -107,6 +114,52 @@ object FriendRequestAppService {
       )
     } yield acceptedRequests.map(_.toDTO)
 
+  def getFriendPostFeed(
+    token: IdToken,
+    offset: Offset,
+    limit: Limit
+  ): ZIO[PostRepository with UserRepository with Has[
+    FriendRequestService.Service
+  ] with TokenValidation, ApplicationError, Page[post.PostDTO]] =
+    for {
+      userId <- UserService.authenticate(token).map(_.id).someOrFail(UserNotFound)
+      acceptedRequests <- FriendRequestService.getAllUnbounded(
+        FriendRequestFilterAggregate(
+          (SentToUser(userId).lift ||| SentByUser(userId)) &&& WithStatus(Accepted)
+        )
+      )
+      onlyFriends = processFriends(acceptedRequests, userId).flatMap(_.friend.id)
+      postFilters =
+        onlyFriends
+          .map(PostFilter.ByUser)
+          .map(_.lift)
+          .reduceOption(_ ||| _)
+          .getOrElse(False)
+      posts <- PostService.getAllPaginated(offset, limit, postFilters)
+    } yield posts.map(_.toDTO)
+
+  def getFriendMediaFeed(
+    token: IdToken,
+    offset: Offset,
+    limit: Limit
+  ): ZIO[Has[MediaReadService.Service] with Has[FriendRequestService.Service] with TokenValidation with UserRepository, ApplicationError, Page[MediumDTO]] =
+    for {
+      userId <- UserService.authenticate(token).map(_.id).someOrFail(UserNotFound)
+      acceptedRequests <- FriendRequestService.getAllUnbounded(
+        FriendRequestFilterAggregate(
+          (SentToUser(userId).lift ||| SentByUser(userId)) &&& WithStatus(Accepted)
+        )
+      )
+      onlyFriends = processFriends(acceptedRequests, userId).flatMap(_.friend.id)
+      mediaFilters =
+        onlyFriends
+          .map(MediaFilter.ByUser)
+          .map(_.lift)
+          .reduceOption(_ ||| _)
+          .getOrElse(False)
+      media <- MediaReadService.getPaginated(offset, limit, mediaFilters)
+    } yield media.map(_.toDTO)
+
   private def getRequests(
     offset: Offset,
     limit: Limit,
@@ -123,6 +176,16 @@ object FriendRequestAppService {
         toUserFilters
       )
     )
+
+  private def processFriends(requests: Seq[FriendRequest], userId: UserId) = {
+    val friendRequests = requests
+    val friends = friendRequests.foldLeft(Seq.empty[FriendDTO]) { (acc, curr) =>
+      acc :+
+        curr.toDTO.toFriend(curr.fromUser.toDTO) :+
+        curr.toDTO.toFriend(curr.toUser.toDTO)
+    }
+    friends.filter(_.friend.id != Some(userId))
+  }
 
   private def validateInsertRequest(fromUserId: UserId, toUserId: UserId) =
     for {
