@@ -39,11 +39,14 @@ class PostRepositoryLive(env: DatabaseProvider) extends PostRepository.Service {
   override def getAll(offset: Offset, limit: Limit, filters: BoolAlgebra[PostFilter]): IO[ServerError, Seq[PostRecord]] =
     ZIO
       .fromDBIO {
-        Posts.table
+        val query = Posts.table
           .filteredBy(filters)
+          .sortBy(_.dateAdded)
           .drop(offset.value)
           .take(limit.value)
           .result
+        query.statements.foreach(println)
+        query
       }
       .mapError(ServerError)
       .provide(env)

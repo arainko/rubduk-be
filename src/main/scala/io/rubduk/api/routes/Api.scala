@@ -34,7 +34,7 @@ object Api {
       new Service {
         def routes: Route =
           cors() {
-            PostsApi(env) ~ UsersApi(env) ~ new FriendRequestApi(env).routes
+            PostsApi(env) ~ UsersApi(env) ~ new FriendRequestApi(env).routes ~ new FeedApi(env).routes
           }
       }
     }

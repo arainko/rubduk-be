@@ -7,7 +7,8 @@ import io.rubduk.domain.models.auth.IdToken
 import io.rubduk.domain.models.common.{Limit, Offset, Page}
 import io.rubduk.domain.models.media._
 import io.rubduk.domain.models.user.UserId
-import io.rubduk.domain.repositories.{MediaReadRepository, MediaRepository}
+import io.rubduk.domain.repositories.MediaRepository
+import io.rubduk.domain.services.MediaReadService
 import io.rubduk.domain.typeclasses.syntax.BoolAlgebraOps
 import io.rubduk.domain.{MediaApi, MediaReadRepository, MediaRepository, TokenValidation, UserRepository}
 import zio.ZIO
@@ -37,7 +38,7 @@ object MediaService {
     offset: Offset,
     limit: Limit
   ): ZIO[MediaReadRepository, ServerError, Page[Medium]] =
-    MediaReadRepository.getPaginated(
+    MediaReadService.getPaginated(
       offset,
       limit,
       MediaFilter.ByUser(userId).lift
