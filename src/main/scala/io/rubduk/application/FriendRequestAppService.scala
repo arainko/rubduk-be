@@ -8,7 +8,7 @@ import io.rubduk.domain.models.friendrequest.FriendRequestFilter._
 import io.rubduk.domain.models.friendrequest.FriendRequestStatus._
 import io.rubduk.domain.models.friendrequest._
 import io.rubduk.domain.models.user.{UserFilter, UserId}
-import io.rubduk.domain.repositories.FriendRequestRepository
+import io.rubduk.domain.repositories.{FriendRequestRepository, LikeRepository}
 import io.rubduk.domain.services.{FriendRequestService, MediaReadService}
 import io.rubduk.domain.{PostRepository, TokenValidation, UserRepository}
 import Page._
@@ -120,7 +120,7 @@ object FriendRequestAppService {
     limit: Limit
   ): ZIO[PostRepository with UserRepository with Has[
     FriendRequestService.Service
-  ] with TokenValidation, ApplicationError, Page[post.PostDTO]] =
+  ] with TokenValidation with Has[LikeRepository.Service], ApplicationError, Page[post.PostDTO]] =
     for {
       userId <- UserService.authenticate(token).map(_.id).someOrFail(UserNotFound)
       acceptedRequests <- FriendRequestService.getAllUnbounded(

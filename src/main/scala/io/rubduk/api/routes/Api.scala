@@ -9,6 +9,7 @@ import zio.clock.Clock
 import zio.config.ZConfig
 import zio.{Has, URIO, ZIO, ZLayer}
 import ch.megard.akka.http.cors.scaladsl.CorsDirectives._
+import io.rubduk.domain.repositories.LikeRepository
 import io.rubduk.domain.services.FriendRequestService
 
 object Api {
@@ -28,7 +29,8 @@ object Api {
     with MediaRepository
     with Clock
     with FriendRequestRepository
-    with Has[FriendRequestService.Service],
+    with Has[FriendRequestService.Service]
+    with Has[LikeRepository.Service],
     Nothing, Api] =
     ZLayer.fromFunction { env =>
       new Service {

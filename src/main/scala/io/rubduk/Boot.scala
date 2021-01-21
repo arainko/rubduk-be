@@ -57,7 +57,8 @@ object Boot extends App {
             MediaReadService.live ++
             MediaRepository.live ++
             FriendRequestRepository.live ++
-            FriendRequestService.live
+            FriendRequestService.live ++
+            LikeRepository.live
         )
 
     // narrowing down to the required part of the config to ensure separation of concerns

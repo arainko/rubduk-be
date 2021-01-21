@@ -5,10 +5,11 @@ import io.rubduk.api.directives._
 import io.rubduk.application.FriendRequestAppService
 import io.rubduk.domain.{PostRepository, TokenValidation, UserRepository}
 import io.rubduk.domain.models.common._
+import io.rubduk.domain.repositories.LikeRepository
 import io.rubduk.domain.services.{FriendRequestService, MediaReadService}
 import zio.Has
 
-class FeedApi(env: PostRepository with UserRepository with Has[FriendRequestService.Service] with Has[MediaReadService.Service] with TokenValidation) extends Api.Service {
+class FeedApi(env: PostRepository with UserRepository with Has[FriendRequestService.Service] with Has[MediaReadService.Service] with Has[LikeRepository.Service] with TokenValidation) extends Api.Service {
   import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
   import io.rubduk.api.serializers.codecs._
   import io.rubduk.api.serializers.unmarshallers._

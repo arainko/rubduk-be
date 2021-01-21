@@ -3,7 +3,7 @@ package io.rubduk.api
 import akka.http.interop.ErrorResponse
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import io.rubduk.domain.errors.ApplicationError
-import io.rubduk.domain.errors.ApplicationError.{AuthenticationError, CommentNotByThisUser, CommentNotFound, CommentNotUnderPost, DomainError, FriendRequestAlreadyApproved, FriendRequestNotFound, FriendRequestNotPending, FriendRequestPending, FriendRequestRejected, FriendRequestSentByYourself, MediumNotFound, PostNotByThisUser, PostNotFound, ServerError, ThirdPartyError, UserAlreadyExists, UserNotFound, ValidationError}
+import io.rubduk.domain.errors.ApplicationError.{AuthenticationError, CommentNotByThisUser, CommentNotFound, CommentNotUnderPost, DomainError, FriendRequestAlreadyApproved, FriendRequestNotFound, FriendRequestNotPending, FriendRequestPending, FriendRequestRejected, FriendRequestSentByYourself, MediumNotFound, PostAlreadyLiked, PostNotByThisUser, PostNotFound, PostNotLiked, ServerError, ThirdPartyError, UserAlreadyExists, UserNotFound, ValidationError}
 
 object errors {
 
@@ -38,10 +38,14 @@ object errors {
       HttpResponse(StatusCodes.UnprocessableEntity, entity = "User with specified email already exists.")
     case MediumNotFound =>
       HttpResponse(StatusCodes.NotFound, entity = "Requested medium was not found.")
+    case PostAlreadyLiked =>
+      HttpResponse(StatusCodes.UnprocessableEntity, entity = "This post is already liked by you!")
+    case PostNotLiked =>
+      HttpResponse(StatusCodes.UnprocessableEntity, entity = "This post isn't like by you!")
   }
 
   implicit val applicationErrorResponse: ErrorResponse[ApplicationError] = {
-    case ServerError(_)           => HttpResponse(StatusCodes.InternalServerError, entity = "A server error has occurred.")
+    case ServerError(message)           => HttpResponse(StatusCodes.InternalServerError, entity = message)
     case ValidationError(message) => HttpResponse(StatusCodes.BadRequest, entity = message)
     case ThirdPartyError(_) =>
       HttpResponse(

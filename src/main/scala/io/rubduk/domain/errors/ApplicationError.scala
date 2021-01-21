@@ -25,6 +25,8 @@ object ApplicationError {
   case object UserNotFound                 extends DomainError
   case object UserAlreadyExists            extends DomainError
   case object MediumNotFound               extends DomainError
+  case object PostAlreadyLiked             extends DomainError
+  case object PostNotLiked                 extends DomainError
 
   object ServerError extends (Throwable => ServerError) {
     override def apply(throwable: Throwable): ServerError = ServerError(throwable.getMessage)

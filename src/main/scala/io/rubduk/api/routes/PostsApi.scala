@@ -6,24 +6,29 @@ import akka.http.scaladsl.server.directives.MarshallingDirectives.{as => parse}
 import cats.syntax.functor._
 import io.rubduk.api.directives._
 import io.rubduk.api.serializers.unmarshallers._
-import io.rubduk.application.{CommentService, PostService, UserService}
+import io.rubduk.application.{CommentService, LikeService, PostService, UserService}
 import io.rubduk.domain._
 import io.rubduk.domain.errors.ApplicationError._
 import io.rubduk.domain.models.comment._
 import io.rubduk.domain.models.common._
 import io.rubduk.domain.models.post._
 import io.rubduk.domain.models.user._
+import io.rubduk.domain.repositories.LikeRepository
 import io.rubduk.domain.typeclasses.BoolAlgebra.True
 import io.rubduk.domain.typeclasses.syntax._
+import zio._
 
 object PostsApi {
 
-  def apply(env: PostRepository with UserRepository with CommentRepository with TokenValidation): Route =
+  def apply(
+    env: PostRepository with Has[LikeRepository.Service] with UserRepository with CommentRepository with TokenValidation
+  ): Route =
     new PostsApi(env).routes
 }
 
-class PostsApi(env: PostRepository with UserRepository with CommentRepository with TokenValidation)
-    extends Api.Service {
+class PostsApi(
+  env: PostRepository with Has[LikeRepository.Service] with UserRepository with CommentRepository with TokenValidation
+) extends Api.Service {
   import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
   import io.rubduk.api.errors._
   import io.rubduk.api.serializers.codecs._
@@ -39,8 +44,7 @@ class PostsApi(env: PostRepository with UserRepository with CommentRepository wi
           pathEnd {
             complete {
 
-              val filters = Seq(maybeUserId.map(PostFilter.ByUser))
-                .flatten
+              val filters = Seq(maybeUserId.map(PostFilter.ByUser)).flatten
                 .map(_.lift)
                 .foldLeft(True[PostFilter])(_ &&& _)
 
@@ -108,7 +112,23 @@ class PostsApi(env: PostRepository with UserRepository with CommentRepository wi
           }
         }
       } ~ (put & idToken) { idToken =>
-        (path(Id[PostId]) & entity(parse[PostDTO])) { (postId, post) =>
+        path(Id[PostId] / "like") { postId =>
+          pathEnd {
+            complete {
+              LikeService
+                .likePost(idToken, postId)
+                .provide(env)
+            }
+          }
+        } ~ path(Id[PostId] / "unlike") { postId =>
+          pathEnd {
+            complete {
+              LikeService
+                .unlikePost(idToken, postId)
+                .provide(env)
+            }
+          }
+        } ~ (path(Id[PostId]) & entity(parse[PostDTO])) { (postId, post) =>
           pathEnd {
             complete {
               UserService
