@@ -11,7 +11,7 @@ import io.rubduk.domain.repositories.MediaRepository
 import io.rubduk.domain.services.MediaReadService
 import io.rubduk.domain.typeclasses.syntax.BoolAlgebraOps
 import io.rubduk.domain.{MediaApi, MediaReadRepository, MediaRepository, TokenValidation, UserRepository}
-import zio.ZIO
+import zio._
 import zio.clock.{Clock, currentDateTime}
 
 object MediaService {
@@ -43,6 +43,11 @@ object MediaService {
       limit,
       MediaFilter.ByUser(userId).lift
     )
+
+  def getById(mediumId: MediumId): ZIO[MediaRepository, ApplicationError, Medium] =
+    MediaRepository.getById(mediumId)
+      .someOrFail(MediumNotFound)
+      .map(_.toDomain)
 
   def delete(mediumId: MediumId): ZIO[MediaRepository, ServerError, RowCount] =
     MediaRepository.delete(mediumId)

@@ -3,7 +3,7 @@ package io.rubduk.api
 import akka.http.interop.ErrorResponse
 import akka.http.scaladsl.model.{HttpResponse, StatusCodes}
 import io.rubduk.domain.errors.ApplicationError
-import io.rubduk.domain.errors.ApplicationError.{AuthenticationError, CommentNotByThisUser, CommentNotFound, CommentNotUnderPost, DomainError, FriendRequestAlreadyApproved, FriendRequestNotFound, FriendRequestNotPending, FriendRequestPending, FriendRequestRejected, FriendRequestSentByYourself, PostNotByThisUser, PostNotFound, ServerError, ThirdPartyError, UserAlreadyExists, UserNotFound, ValidationError}
+import io.rubduk.domain.errors.ApplicationError.{AuthenticationError, CommentNotByThisUser, CommentNotFound, CommentNotUnderPost, DomainError, FriendRequestAlreadyApproved, FriendRequestNotFound, FriendRequestNotPending, FriendRequestPending, FriendRequestRejected, FriendRequestSentByYourself, MediumNotFound, PostNotByThisUser, PostNotFound, ServerError, ThirdPartyError, UserAlreadyExists, UserNotFound, ValidationError}
 
 object errors {
 
@@ -36,6 +36,8 @@ object errors {
       HttpResponse(StatusCodes.NotFound, entity = "Requested user was not found.")
     case UserAlreadyExists =>
       HttpResponse(StatusCodes.UnprocessableEntity, entity = "User with specified email already exists.")
+    case MediumNotFound =>
+      HttpResponse(StatusCodes.NotFound, entity = "Requested medium was not found.")
   }
 
   implicit val applicationErrorResponse: ErrorResponse[ApplicationError] = {

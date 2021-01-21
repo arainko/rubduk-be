@@ -30,6 +30,8 @@ object FilterInterpreter {
     (_: CommentFilter) => Filter.productEmpty
 
   implicit val userFilterInterpreter: SlickInterpreter[UserFilter, Users.Schema] = {
+    case UserFilter.ById(id) => Filter(_.id === id)
+    case UserFilter.ByEmail(email) => Filter(_.email === email)
       case UserFilter.NameContaining(name) =>
         Filter { user =>
           val normalizedName = user.name.toLowerCase

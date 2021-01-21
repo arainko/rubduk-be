@@ -43,11 +43,11 @@ object friendrequest {
     dateAdded: OffsetDateTime
   ) {
 
-    def toDomain(fromUser: UserRecord, toUser: UserRecord): FriendRequest =
+    def toDomain(fromUser: User, toUser: User): FriendRequest =
       this
         .into[FriendRequest]
-        .withFieldConst(_.fromUser, fromUser.toDomain)
-        .withFieldConst(_.toUser, toUser.toDomain)
+        .withFieldConst(_.fromUser, fromUser)
+        .withFieldConst(_.toUser, toUser)
         .transform
   }
 

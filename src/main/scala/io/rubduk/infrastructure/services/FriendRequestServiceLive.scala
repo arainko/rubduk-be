@@ -5,8 +5,10 @@ import io.rubduk.domain.errors.ApplicationError.ServerError
 import io.rubduk.domain.errors.ApplicationError._
 import io.rubduk.domain.models.common._
 import io.rubduk.domain.models.friendrequest._
+import io.rubduk.domain.models.media.MediumRecord
+import io.rubduk.domain.models.user.UserRecord
 import io.rubduk.domain.services.FriendRequestService
-import io.rubduk.infrastructure.tables.{FriendRequests, Users}
+import io.rubduk.infrastructure.tables.{FriendRequests, Media, Users}
 import io.rubduk.infrastructure.filters.syntax._
 import zio._
 import slick.interop.zio._
@@ -19,9 +21,15 @@ class FriendRequestServiceLive(env: DatabaseProvider) extends FriendRequestServi
   private def joinedRequests(filters: FriendRequestFilterAggregate) =
     for {
       reqs <- FriendRequests.table.filteredBy(filters.requestFilters)
-      fromUser <- Users.table.filteredBy(filters.fromUserFilters) if reqs.fromUserId === fromUser.id
-      toUser <- Users.table.filteredBy(filters.toUserFilters) if reqs.toUserId === toUser.id
-    } yield (reqs, fromUser, toUser)
+      (fromUser, fromUserProfilePic) <-
+        Users.table
+          .filteredBy(filters.fromUserFilters)
+          .joinLeft(Media.table)
+          .on(_.profilePicId === _.id) if reqs.fromUserId === fromUser.id
+      (toUser, toUserProfilePic) <- Users.table.filteredBy(filters.toUserFilters)
+        .joinLeft(Media.table)
+        .on(_.profilePicId === _.id) if reqs.toUserId === toUser.id
+    } yield (reqs, fromUser, fromUserProfilePic, toUser, toUserProfilePic)
 
   override def getPaginated(
     offset: Offset,
@@ -46,10 +54,7 @@ class FriendRequestServiceLive(env: DatabaseProvider) extends FriendRequestServi
           .take(limit.value)
           .result
       }
-      .bimap(
-        ServerError,
-        _.map { case (request, fromUser, toUser) => request.toDomain(fromUser, toUser) }
-      )
+      .bimap(ServerError, _.map(joined))
       .provide(env)
 
   override def getSingle(filters: FriendRequestFilterAggregate): IO[ApplicationError, FriendRequest] =
@@ -60,10 +65,7 @@ class FriendRequestServiceLive(env: DatabaseProvider) extends FriendRequestServi
           .result
           .headOption
       }
-      .bimap(
-        ServerError,
-        _.map { case (request, fromUser, toUser) => request.toDomain(fromUser, toUser) }
-      )
+      .bimap(ServerError, _.map(joined))
       .unrefineTo[ApplicationError]
       .someOrFail(FriendRequestNotFound)
       .provide(env)
@@ -73,9 +75,14 @@ class FriendRequestServiceLive(env: DatabaseProvider) extends FriendRequestServi
       .fromDBIO {
         joinedRequests(filters).result
       }
-      .bimap(
-        ServerError,
-        _.map { case (request, fromUser, toUser) => request.toDomain(fromUser, toUser) }
-      )
+      .bimap(ServerError, _.map(joined))
       .provide(env)
+
+  private def joined(tupled: (FriendRequestRecord, UserRecord, Option[MediumRecord], UserRecord, Option[MediumRecord])) = {
+    val (request, fromUser, fromUserProfilePic, toUser, toUserProfilePic) = tupled
+    request.toDomain(
+      fromUser.toDomain(fromUserProfilePic.map(_.toDomain)),
+      toUser.toDomain(toUserProfilePic.map(_.toDomain))
+    )
+  }
 }

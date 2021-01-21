@@ -108,6 +108,15 @@ class UsersApi(
                 .provide(env)
             }
           }
+        } ~ (path("me" / "pic") & idToken) { token =>
+          entity(parse[MediumId]) { mediumId =>
+            pathEnd {
+              complete {
+                UserService.updateProfilePicture(token, mediumId)
+                  .provide(env)
+              }
+            }
+          }
         }
       }
     }

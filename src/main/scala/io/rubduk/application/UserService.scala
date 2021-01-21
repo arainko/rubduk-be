@@ -5,13 +5,12 @@ import io.rubduk.domain.errors.ApplicationError
 import io.rubduk.domain.errors.ApplicationError.{ServerError, _}
 import io.rubduk.domain.models.auth.IdToken
 import io.rubduk.domain.models.common.{Limit, Offset, Page}
+import io.rubduk.domain.models.media.MediumId
 import io.rubduk.domain.models.user.{User, UserDTO, UserFilter, UserId}
 import io.rubduk.domain.repositories.UserRepository
-import io.rubduk.domain.{TokenValidation, UserRepository}
-import Page._
+import io.rubduk.domain.{MediaRepository, TokenValidation, UserRepository}
 import io.rubduk.domain.typeclasses.BoolAlgebra
-import cats.syntax.functor._
-import zio.ZIO
+import zio._
 
 import java.time.OffsetDateTime
 
@@ -21,13 +20,11 @@ object UserService {
     UserRepository
       .getById(userId)
       .someOrFail(UserNotFound)
-      .map(_.toDomain)
 
   def getByEmail(email: String): ZIO[UserRepository, ApplicationError, User] =
     UserRepository
       .getByEmail(email)
       .someOrFail(UserNotFound)
-      .map(_.toDomain)
 
   def authenticate(idToken: IdToken): ZIO[TokenValidation with UserRepository, ApplicationError, User] =
     for {
@@ -50,7 +47,6 @@ object UserService {
   ): ZIO[UserRepository, ServerError, Page[User]] =
     UserRepository
       .getAllPaginated(offset, limit, filters)
-      .map(_.map(_.toDomain))
 
   def getAll(
     offset: Offset,
@@ -59,7 +55,18 @@ object UserService {
   ): ZIO[UserRepository, ServerError, Seq[User]] =
     UserRepository
       .getAll(offset, limit, filters)
-      .map(_.map(_.toDomain))
+
+  def updateProfilePicture(
+    idToken: IdToken,
+    mediumId: MediumId
+  ): ZIO[UserRepository with MediaRepository with TokenValidation with UserRepository, ApplicationError, Unit] =
+    for {
+      user   <- authenticate(idToken)
+      userId <- ZIO.fromOption(user.id).orElseFail(UserNotFound)
+      medium <- MediaService.getById(mediumId)
+      _      <- ZIO.cond(medium.userId == userId, (), AuthenticationError)
+      _      <- UserRepository.updateProfilePicture(userId, mediumId)
+    } yield ()
 
   def insert(user: UserDTO): ZIO[UserRepository, ApplicationError, UserId] =
     UserRepository
