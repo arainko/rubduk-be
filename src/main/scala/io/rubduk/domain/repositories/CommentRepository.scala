@@ -37,6 +37,8 @@ object CommentRepository {
     def insert(postId: PostId, comment: CommentRecord): IO[ServerError, CommentId]
 
     def update(commentId: CommentId, contents: String): IO[ServerError, RowCount]
+
+    def delete(commentId: CommentId): IO[ServerError, RowCount]
   }
 
   val live: URLayer[DatabaseProvider, CommentRepository] = ZLayer.fromFunction { database =>

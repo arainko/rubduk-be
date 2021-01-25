@@ -88,4 +88,14 @@ class CommentRepositoryLive(env: DatabaseProvider) extends CommentRepository.Ser
       }
       .mapError(ServerError)
       .provide(env)
+
+  override def delete(commentId: CommentId): IO[ServerError, RowCount] =
+    ZIO
+      .fromDBIO {
+        Comments.table
+          .filter(_.id === commentId)
+          .delete
+      }
+      .mapError(ServerError)
+      .provide(env)
 }

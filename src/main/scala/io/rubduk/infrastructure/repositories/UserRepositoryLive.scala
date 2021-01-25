@@ -31,18 +31,15 @@ class UserRepositoryLive(env: DatabaseProvider) extends UserRepository.Service {
   override def getById(userId: UserId): IO[ServerError, Option[User]] =
     ZIO
       .fromDBIO {
-        joinedUser(UserFilter.ById(userId).lift)
-          .result
-          .headOption
-      }.bimap(ServerError, _.map { case (user, pic) => user.toDomain(pic.map(_.toDomain)) })
+        joinedUser(UserFilter.ById(userId).lift).result.headOption
+      }
+      .bimap(ServerError, _.map { case (user, pic) => user.toDomain(pic.map(_.toDomain)) })
       .provide(env)
 
   override def getByEmail(email: String): IO[ServerError, Option[User]] =
     ZIO
       .fromDBIO {
-        joinedUser(UserFilter.ByEmail(email).lift)
-          .result
-          .headOption
+        joinedUser(UserFilter.ByEmail(email).lift).result.headOption
       }
       .bimap(ServerError, _.map { case (user, pic) => user.toDomain(pic.map(_.toDomain)) })
       .provide(env)
@@ -88,12 +85,13 @@ class UserRepositoryLive(env: DatabaseProvider) extends UserRepository.Service {
       .provide(env)
 
   override def updateProfilePicture(userId: UserId, mediumId: MediumId): IO[ServerError, RowCount] =
-    ZIO.fromDBIO {
-      Users.table
-        .filter(_.id === userId)
-        .map(_.profilePicId)
-        .update(mediumId.some)
-    }
+    ZIO
+      .fromDBIO {
+        Users.table
+          .filter(_.id === userId)
+          .map(_.profilePicId)
+          .update(mediumId.some)
+      }
       .mapError(ServerError)
       .provide(env)
 
@@ -104,6 +102,16 @@ class UserRepositoryLive(env: DatabaseProvider) extends UserRepository.Service {
           .filter(_.id === userId)
           .map(u => (u.name, u.lastName, u.dateOfBirth))
           .update((user.name, user.lastName, user.dateOfBirth))
+      }
+      .mapError(ServerError)
+      .provide(env)
+
+  override def delete(userId: UserId): IO[ServerError, RowCount] =
+    ZIO
+      .fromDBIO {
+        Users.table
+          .filter(_.id === userId)
+          .delete
       }
       .mapError(ServerError)
       .provide(env)
