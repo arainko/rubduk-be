@@ -2,7 +2,6 @@ package io.rubduk.application
 
 import io.rubduk.domain.errors.ApplicationError
 import io.rubduk.domain.errors.ApplicationError._
-import io.rubduk.domain.models.aliases.RowCount
 import io.rubduk.domain.models.auth.IdToken
 import io.rubduk.domain.models.common.{Limit, Offset, Page}
 import io.rubduk.domain.models.media._
@@ -45,11 +44,18 @@ object MediaService {
     )
 
   def getById(mediumId: MediumId): ZIO[MediaRepository, ApplicationError, Medium] =
-    MediaRepository.getById(mediumId)
+    MediaRepository
+      .getById(mediumId)
       .someOrFail(MediumNotFound)
       .map(_.toDomain)
 
-  def delete(mediumId: MediumId): ZIO[MediaRepository, ServerError, RowCount] =
-    MediaRepository.delete(mediumId)
-
+  def delete(
+    idToken: IdToken,
+    mediumId: MediumId
+  ): ZIO[MediaRepository with TokenValidation with UserRepository, ApplicationError, Unit] =
+    for {
+      userId <- UserService.authenticate(idToken).map(_.id).someOrFail(UserNotFound)
+      _      <- MediaService.getById(mediumId).map(_.userId).filterOrFail(_ == userId)(AuthenticationError)
+      _      <- MediaRepository.delete(mediumId)
+    } yield ()
 }

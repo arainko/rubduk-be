@@ -8,6 +8,7 @@ import zio.Has
 package object domain {
   type UserRepository          = Has[UserRepository.Service]
   type PostRepository          = Has[PostRepository.Service]
+  type LikeRepository          = Has[LikeRepository.Service]
   type CommentRepository       = Has[CommentRepository.Service]
   type TokenValidation         = Has[TokenValidation.Service]
   type MediaApi                = Has[MediaApi.Service]

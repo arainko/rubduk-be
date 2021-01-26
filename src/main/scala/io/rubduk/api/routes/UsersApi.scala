@@ -64,7 +64,7 @@ class UsersApi(
         } ~ path(Id[UserId] / "media") { userId =>
           parameters(
             "offset".as(offset) ? Offset(0),
-            "limit".as(limit) ? Limit(10),
+            "limit".as(limit) ? Limit(10)
           ) { (offset, limit) =>
             pathEnd {
               complete {
@@ -112,9 +112,28 @@ class UsersApi(
           entity(parse[MediumId]) { mediumId =>
             pathEnd {
               complete {
-                UserService.updateProfilePicture(token, mediumId)
+                UserService
+                  .updateProfilePicture(token, mediumId)
                   .provide(env)
               }
+            }
+          }
+        }
+      } ~ (delete & idToken) { token =>
+        path("me") {
+          pathEnd {
+            complete {
+              UserService
+                .delete(token)
+                .provide(env)
+            }
+          }
+        } ~ path("media" / Id[MediumId]) { mediumId =>
+          pathEnd {
+            complete {
+              MediaService
+                .delete(token, mediumId)
+                .provide(env)
             }
           }
         }

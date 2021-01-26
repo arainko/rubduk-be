@@ -2,6 +2,7 @@ package io.rubduk.application
 
 import io.rubduk.domain.errors.ApplicationError
 import io.rubduk.domain.errors.ApplicationError._
+import io.rubduk.domain.models.auth.IdToken
 import io.rubduk.domain.models.comment.{Comment, CommentDTO, CommentFilter, CommentId}
 import io.rubduk.domain.models.common.{Limit, Offset, Page}
 import io.rubduk.domain.models.post.PostId
@@ -75,5 +76,16 @@ object CommentService {
           .unrefineTo[ApplicationError]
           .filterOrFail(_ == userId)(CommentNotByThisUser)
       _ <- CommentRepository.update(commentId, comment.contents)
+    } yield ()
+
+  def delete(idToken: IdToken, postId: PostId, commentId: CommentId) =
+    for {
+      userId <- UserService.authenticate(idToken).map(_.id).someOrFail(UserNotFound)
+      _ <-
+        CommentService
+          .getById(postId, commentId)
+          .map(_.user.id)
+          .filterOrFail(_.contains(userId))(CommentNotByThisUser)
+      _ <- CommentRepository.delete(commentId)
     } yield ()
 }

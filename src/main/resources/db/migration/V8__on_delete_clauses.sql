@@ -12,6 +12,13 @@ alter table comments
             references users (id)
             on delete cascade;
 
+alter table users
+    drop constraint users_profile_pic_id_fkey,
+    add constraint users_profile_pic_id_fkey
+        foreign key (profile_pic_id)
+            references media (id)
+            on delete set null;
+
 alter table posts
     drop constraint posts_user_id_fkey,
     add constraint posts_user_id_fkey
