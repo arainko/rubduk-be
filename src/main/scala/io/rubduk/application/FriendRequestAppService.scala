@@ -134,7 +134,7 @@ object FriendRequestAppService {
           .map(PostFilter.ByUser)
           .map(_.lift)
           .reduceOption(_ ||| _)
-          .getOrElse(False)
+          .getOrElse(False) ||| PostFilter.ByUser(userId)
       posts <- PostService.getAllPaginated(offset, limit, postFilters)
     } yield posts.map(_.toDTO)
 
@@ -156,7 +156,7 @@ object FriendRequestAppService {
           .map(MediaFilter.ByUser)
           .map(_.lift)
           .reduceOption(_ ||| _)
-          .getOrElse(False)
+          .getOrElse(False) ||| MediaFilter.ByUser(userId)
       media <- MediaReadService.getPaginated(offset, limit, mediaFilters)
     } yield media.map(_.toDTO)
 
