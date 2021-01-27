@@ -30,6 +30,9 @@ object PostRepository {
     def insert(post: PostRecord): IO[ServerError, PostId]
 
     def update(postId: PostId, contents: String): IO[ServerError, RowCount]
+
+    def delete(postId: PostId): IO[ServerError, RowCount]
+
   }
 
   val live: URLayer[DatabaseProvider, PostRepository] = ZLayer.fromFunction { database =>

@@ -13,21 +13,19 @@ import io.rubduk.domain.models.comment._
 import io.rubduk.domain.models.common._
 import io.rubduk.domain.models.post._
 import io.rubduk.domain.models.user._
-import io.rubduk.domain.repositories.LikeRepository
 import io.rubduk.domain.typeclasses.BoolAlgebra.True
 import io.rubduk.domain.typeclasses.syntax._
-import zio._
 
 object PostsApi {
 
   def apply(
-    env: PostRepository with Has[LikeRepository.Service] with UserRepository with CommentRepository with TokenValidation
+    env: PostRepository with LikeRepository with UserRepository with CommentRepository with TokenValidation
   ): Route =
     new PostsApi(env).routes
 }
 
 class PostsApi(
-  env: PostRepository with Has[LikeRepository.Service] with UserRepository with CommentRepository with TokenValidation
+  env: PostRepository with LikeRepository with UserRepository with CommentRepository with TokenValidation
 ) extends Api.Service {
   import de.heikoseeberger.akkahttpcirce.FailFastCirceSupport._
   import io.rubduk.api.errors._
@@ -147,6 +145,24 @@ class PostsApi(
                 .map(_.id)
                 .someOrFail(UserNotFound)
                 .flatMap(userId => CommentService.update(userId, postId, commentId, comment))
+                .provide(env)
+            }
+          }
+        }
+      } ~ (delete & idToken) { token =>
+        path(Id[PostId]) { postId =>
+          pathEnd {
+            complete {
+              PostService
+                .delete(token, postId)
+                .provide(env)
+            }
+          }
+        } ~ path(Id[PostId] / "comments" / Id[CommentId]) { (postId, commentId) =>
+          pathEnd {
+            complete {
+              CommentService
+                .delete(token, postId, commentId)
                 .provide(env)
             }
           }

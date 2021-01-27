@@ -86,4 +86,12 @@ object UserService {
       originalCreatedOn = fetchedUser.createdOn
       _ <- UserRepository.update(userId, user.toDAO(originalCreatedOn))
     } yield ()
+
+  def delete(idToken: IdToken): ZIO[TokenValidation with UserRepository, ApplicationError, Unit] =
+    UserService
+      .authenticate(idToken)
+      .map(_.id)
+      .someOrFail(UserNotFound)
+      .flatMap(UserRepository.delete)
+      .unit
 }

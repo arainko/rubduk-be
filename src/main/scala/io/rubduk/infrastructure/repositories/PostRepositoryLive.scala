@@ -36,7 +36,11 @@ class PostRepositoryLive(env: DatabaseProvider) extends PostRepository.Service {
       case (posts, postCount) => Page(posts, postCount)
     }
 
-  override def getAll(offset: Offset, limit: Limit, filters: BoolAlgebra[PostFilter]): IO[ServerError, Seq[PostRecord]] =
+  override def getAll(
+    offset: Offset,
+    limit: Limit,
+    filters: BoolAlgebra[PostFilter]
+  ): IO[ServerError, Seq[PostRecord]] =
     ZIO
       .fromDBIO {
         val query = Posts.table
@@ -74,6 +78,16 @@ class PostRepositoryLive(env: DatabaseProvider) extends PostRepository.Service {
           .filter(_.id === postId)
           .map(p => p.contents)
           .update(contents)
+      }
+      .mapError(ServerError)
+      .provide(env)
+
+  override def delete(postId: PostId): IO[ServerError, RowCount] =
+    ZIO
+      .fromDBIO {
+        Posts.table
+          .filter(_.id === postId)
+          .delete
       }
       .mapError(ServerError)
       .provide(env)

@@ -34,6 +34,8 @@ object UserRepository {
 
     def update(userId: UserId, user: UserRecord): IO[ServerError, RowCount]
 
+    def delete(userId: UserId): IO[ServerError, RowCount]
+
     def updateProfilePicture(userId: UserId, mediumId: MediumId): IO[ServerError, RowCount]
   }
 
