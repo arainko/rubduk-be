@@ -32,7 +32,7 @@ object TokenValidation {
         .build()
 
       private def suppressedFallback(idToken: IdToken): Either[ValidationError, TokenUser] = {
-        val token = idToken.token.split('-').toList
+        val token = idToken.token.split(":::").toList
         (token.headOption, token.tail.headOption, token.tail.tail.headOption)
           .mapN(TokenUser)
           .toRight(ValidationError("Couldn't construct a token user from the provided mock token"))
